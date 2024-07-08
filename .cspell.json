@@ -1,0 +1,5 @@
+{
+  "ignorePaths": [".cppcheck_suppressions"],
+  "ignoreRegExpList": [],
+  "words": []
+}
