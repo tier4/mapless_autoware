@@ -286,7 +286,8 @@ int TestRecenterGoalpoint()
   MissionPlannerNode mission_planner = MissionPlannerNode(options);
 
   // Get a local road model for testing
-  autoware_mapless_planning_msgs::msg::RoadSegments road_segments = GetTestRoadModelForRecenterTests();
+  autoware_mapless_planning_msgs::msg::RoadSegments road_segments =
+    GetTestRoadModelForRecenterTests();
 
   // Used for the output
   std::vector<LaneletConnection> lanelet_connections;

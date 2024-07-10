@@ -10,16 +10,16 @@ The two plots show the point in time, when the lane change was triggered.
 
 ## Input topics
 
-| Name                                   | Type                                  | Description |
-| -------------------------------------- | ------------------------------------- | ----------- |
+| Name                                   | Type                                          | Description |
+| -------------------------------------- | --------------------------------------------- | ----------- |
 | `mission_planner_node/input/local_map` | autoware_mapless_planning_msgs::msg::LocalMap | local map   |
 | `mission_planner/input/mission`        | autoware_mapless_planning_msgs::msg::Mission  | mission     |
-| `mission_planner/input/state_estimate` | nav_msgs::msg::Odometry               | odometry    |
+| `mission_planner/input/state_estimate` | nav_msgs::msg::Odometry                       | odometry    |
 
 ## Output topics
 
-| Name                                                | Type                                             | Description   |
-| --------------------------------------------------- | ------------------------------------------------ | ------------- |
+| Name                                                | Type                                                     | Description   |
+| --------------------------------------------------- | -------------------------------------------------------- | ------------- |
 | `mission_planner_node/output/mission_lanes_stamped` | autoware_mapless_planning_msgs::msg::MissionLanesStamped | mission lanes |
 
 ## Node parameters

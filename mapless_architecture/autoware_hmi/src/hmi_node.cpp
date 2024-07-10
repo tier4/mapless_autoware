@@ -34,8 +34,8 @@ HMINode::HMINode(const rclcpp::NodeOptions & options) : Node("hmi_node", options
   this->declare_parameter("mission", "LANE_KEEP");
 
   // Initialize publisher
-  mission_publisher_ =
-    this->create_publisher<autoware_mapless_planning_msgs::msg::Mission>("hmi_node/output/mission", 1);
+  mission_publisher_ = this->create_publisher<autoware_mapless_planning_msgs::msg::Mission>(
+    "hmi_node/output/mission", 1);
 
   // Initialize parameters callback handle
   param_callback_handle_ = this->add_on_set_parameters_callback(
@@ -80,7 +80,8 @@ void HMINode::PublishMission_(std::string mission)
   } else if (mission == "TAKE_NEXT_EXIT_LEFT") {
     missionMessage.mission_type = autoware_mapless_planning_msgs::msg::Mission::TAKE_NEXT_EXIT_LEFT;
   } else if (mission == "TAKE_NEXT_EXIT_RIGHT") {
-    missionMessage.mission_type = autoware_mapless_planning_msgs::msg::Mission::TAKE_NEXT_EXIT_RIGHT;
+    missionMessage.mission_type =
+      autoware_mapless_planning_msgs::msg::Mission::TAKE_NEXT_EXIT_RIGHT;
   }
 
   // TODO(simon.eisenmann@driveblocks.ai): Change deadline parameter

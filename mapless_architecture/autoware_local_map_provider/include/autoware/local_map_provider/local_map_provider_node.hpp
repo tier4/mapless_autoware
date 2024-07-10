@@ -49,7 +49,8 @@ private:
 
   rclcpp::Publisher<autoware_mapless_planning_msgs::msg::LocalMap>::SharedPtr map_publisher_;
 
-  rclcpp::Subscription<autoware_mapless_planning_msgs::msg::RoadSegments>::SharedPtr road_subscriber_;
+  rclcpp::Subscription<autoware_mapless_planning_msgs::msg::RoadSegments>::SharedPtr
+    road_subscriber_;
 };
 }  // namespace autoware::mapless_architecture
 

@@ -366,7 +366,8 @@ void MissionPlannerNode::CallbackOdometryMessages_(const nav_msgs::msg::Odometry
   return;
 }
 
-void MissionPlannerNode::CallbackMissionMessages_(const autoware_mapless_planning_msgs::msg::Mission & msg)
+void MissionPlannerNode::CallbackMissionMessages_(
+  const autoware_mapless_planning_msgs::msg::Mission & msg)
 {
   // Initialize variables
   lane_change_trigger_success_ = false;

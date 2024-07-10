@@ -99,7 +99,8 @@ int TestMissionToTrajectory()
     mission_msg.drivable_lanes_left.back().centerline.back().y);
 
   // TEST 4: neighbor lane right
-  mission_msg.drivable_lanes_right.push_back(autoware_mapless_planning_msgs::msg::DrivingCorridor());
+  mission_msg.drivable_lanes_right.push_back(
+    autoware_mapless_planning_msgs::msg::DrivingCorridor());
   mission_msg.drivable_lanes_right.back().centerline.push_back(geometry_msgs::msg::Point());
   mission_msg.drivable_lanes_right.back().centerline.back().x = 1.0;
   mission_msg.drivable_lanes_right.back().centerline.back().y = 1.2;
