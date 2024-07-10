@@ -1,13 +1,25 @@
-// Copyright 2024 driveblocks GmbH
-// driveblocks proprietary license
+// Copyright 2024 driveblocks GmbH, authors: Simon Eisenmann, Thomas Herrmann
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 #ifndef AUTOWARE__MISSION_LANE_CONVERTER__MISSION_LANE_CONVERTER_NODE_HPP_
 #define AUTOWARE__MISSION_LANE_CONVERTER__MISSION_LANE_CONVERTER_NODE_HPP_
 
 #include "rclcpp/rclcpp.hpp"
 
-#include "autoware_auto_planning_msgs/msg/path.hpp"
-#include "autoware_auto_planning_msgs/msg/trajectory.hpp"
 #include "autoware_planning_msgs/msg/mission_lanes_stamped.hpp"
+#include "autoware_planning_msgs/msg/path.hpp"
+#include "autoware_planning_msgs/msg/trajectory.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include "visualization_msgs/msg/marker.hpp"
 #include "visualization_msgs/msg/marker_array.hpp"
@@ -25,20 +37,20 @@ namespace autoware::mapless_architecture
 class MissionLaneConverterNode : public rclcpp::Node
 {
 public:
-  MissionLaneConverterNode();
+  explicit MissionLaneConverterNode(const rclcpp::NodeOptions & options);
 
   /**
    * @brief Converts the mission message into a reference trajectory which is
    * forwarded to a local trajectory planner for refinement.
    *
    * @param msg The mission lanes
-   * @return std::tuple<autoware_auto_planning_msgs::msg::Trajectory,
-   * visualization_msgs::msg::Marker, autoware_auto_planning_msgs::msg::Path,
+   * @return std::tuple<autoware_planning_msgs::msg::Trajectory,
+   * visualization_msgs::msg::Marker, autoware_planning_msgs::msg::Path,
    * visualization_msgs::msg::Marker>
    */
   std::tuple<
-    autoware_auto_planning_msgs::msg::Trajectory, visualization_msgs::msg::Marker,
-    autoware_auto_planning_msgs::msg::Path, visualization_msgs::msg::MarkerArray>
+    autoware_planning_msgs::msg::Trajectory, visualization_msgs::msg::Marker,
+    autoware_planning_msgs::msg::Path, visualization_msgs::msg::MarkerArray>
   ConvertMissionToTrajectory(const autoware_planning_msgs::msg::MissionLanesStamped & msg);
 
 private:
@@ -58,7 +70,7 @@ private:
    * @param v_x The longitudinal velocity of the point to be added
    */
   void AddTrajectoryPoint_(
-    autoware_auto_planning_msgs::msg::Trajectory & trj_msg, const double x, const double y,
+    autoware_planning_msgs::msg::Trajectory & trj_msg, const double x, const double y,
     const double v_x);
 
   /**
@@ -78,7 +90,7 @@ private:
    *
    * @param trj_msg
    */
-  void AddHeadingToTrajectory_(autoware_auto_planning_msgs::msg::Trajectory & trj_msg);
+  void AddHeadingToTrajectory_(autoware_planning_msgs::msg::Trajectory & trj_msg);
 
   /**
    * @brief Timed callback which shall be executed until a first valid local
@@ -111,8 +123,7 @@ private:
    *@param v_x The v_x value.
    */
   void AddPathPoint_(
-    autoware_auto_planning_msgs::msg::Path & pth_msg, const double x, const double y,
-    const double v_x);
+    autoware_planning_msgs::msg::Path & pth_msg, const double x, const double y, const double v_x);
 
   /**
    *@brief Create a motion planner input.
@@ -124,9 +135,8 @@ private:
    *@param centerline_mission_lane The centerline of the mission lane.
    */
   void CreateMotionPlannerInput_(
-    autoware_auto_planning_msgs::msg::Trajectory & trj_msg,
-    autoware_auto_planning_msgs::msg::Path & path_msg, visualization_msgs::msg::Marker & trj_vis,
-    visualization_msgs::msg::Marker & path_vis,
+    autoware_planning_msgs::msg::Trajectory & trj_msg, autoware_planning_msgs::msg::Path & path_msg,
+    visualization_msgs::msg::Marker & trj_vis, visualization_msgs::msg::Marker & path_vis,
     const std::vector<geometry_msgs::msg::Point> & centerline_mission_lane);
 
   /**
@@ -140,7 +150,7 @@ private:
    * @brief Template to transform both Autoware::Path and Autoware::Trajectory into a global map
    * frame.
    *
-   * @tparam T autoware_auto_planning_msgs::msg::Path, autoware_auto_planning_msgs::msg::Trajectory
+   * @tparam T autoware_planning_msgs::msg::Path, autoware_planning_msgs::msg::Trajectory
    * @param input Input ROS message which content must be transformed into the global map frame
    * @return T Same as input message with the content being valid in the global map
    */
@@ -154,7 +164,7 @@ private:
    * @return visualization_msgs::msg::Marker
    */
   visualization_msgs::msg::Marker GetGlobalTrjVisualization_(
-    const autoware_auto_planning_msgs::msg::Trajectory & trj_msg);
+    const autoware_planning_msgs::msg::Trajectory & trj_msg);
 
   // Declare ROS2 publisher and subscriber
 
@@ -163,10 +173,10 @@ private:
   rclcpp::Subscription<autoware_planning_msgs::msg::MissionLanesStamped>::SharedPtr
     mission_lane_subscriber_;
 
-  rclcpp::Publisher<autoware_auto_planning_msgs::msg::Trajectory>::SharedPtr trajectory_publisher_,
+  rclcpp::Publisher<autoware_planning_msgs::msg::Trajectory>::SharedPtr trajectory_publisher_,
     trajectory_publisher_global_;
 
-  rclcpp::Publisher<autoware_auto_planning_msgs::msg::Path>::SharedPtr path_publisher_,
+  rclcpp::Publisher<autoware_planning_msgs::msg::Path>::SharedPtr path_publisher_,
     path_publisher_global_;
 
   rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr vis_trajectory_publisher_,
@@ -174,12 +184,12 @@ private:
 
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr vis_path_publisher_;
 
-  rclcpp::Publisher<autoware_auto_planning_msgs::msg::Trajectory>::SharedPtr publisher_;
+  rclcpp::Publisher<autoware_planning_msgs::msg::Trajectory>::SharedPtr publisher_;
 
   rclcpp::TimerBase::SharedPtr timer_;
 
-  // Switch to print a warning about wrongly configured odometry frames
-  bool b_global_odometry_deprecation_warning_ = false;
+  // Switch to print an error about wrongly configured odometry frames
+  bool b_input_odom_frame_error_ = false;
   bool received_motion_update_once_ = false;
 
   // Store initial and last available odom messages
@@ -190,6 +200,7 @@ private:
 
   // ROS parameters
   float target_speed_;
+  std::string local_map_frame_;
 };
 }  // namespace autoware::mapless_architecture
 

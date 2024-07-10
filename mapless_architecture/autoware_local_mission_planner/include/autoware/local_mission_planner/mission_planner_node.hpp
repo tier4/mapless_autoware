@@ -1,5 +1,17 @@
-// Copyright 2024 driveblocks GmbH
-// driveblocks proprietary license
+// Copyright 2024 driveblocks GmbH, authors: Simon Eisenmann, Thomas Herrmann
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 #ifndef AUTOWARE__LOCAL_MISSION_PLANNER__MISSION_PLANNER_NODE_HPP_
 #define AUTOWARE__LOCAL_MISSION_PLANNER__MISSION_PLANNER_NODE_HPP_
 
@@ -51,7 +63,7 @@ struct Lanes
 class MissionPlannerNode : public rclcpp::Node
 {
 public:
-  MissionPlannerNode();
+  explicit MissionPlannerNode(const rclcpp::NodeOptions & options);
 
   /**
     * @brief Function which checks if the vehicle is on the goal lane.
@@ -231,7 +243,7 @@ private:
   // Initialize some variables
   Pose2D pose_prev_;
   bool pose_prev_init_ = false;
-  bool b_global_odometry_deprecation_warning_ = false;
+  bool b_input_odom_frame_error_ = false;
   bool received_motion_update_once_ = false;
   Direction target_lane_ = stay;
   Direction mission_ = stay;
@@ -249,6 +261,7 @@ private:
   float distance_to_centerline_threshold_;
   float projection_distance_on_goallane_;
   int retrigger_attempts_max_;
+  std::string local_map_frame_;
 
   // Unique ID for each marker
   int centerline_marker_id_ = 0;

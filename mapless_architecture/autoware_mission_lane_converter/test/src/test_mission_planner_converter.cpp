@@ -1,8 +1,20 @@
-// Copyright 2024 driveblocks GmbH
-// driveblocks proprietary license
+// Copyright 2024 driveblocks GmbH, authors: Simon Eisenmann, Thomas Herrmann
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 #include "autoware/mission_lane_converter/mission_lane_converter_node.hpp"
 #include "gtest/gtest.h"
+#include "rclcpp/rclcpp.hpp"
 
 #include "geometry_msgs/msg/point.hpp"
 
@@ -11,7 +23,8 @@ namespace autoware::mapless_architecture
 
 int TestMissionToTrajectory()
 {
-  MissionLaneConverterNode mission_converter = MissionLaneConverterNode();
+  rclcpp::NodeOptions options;
+  MissionLaneConverterNode mission_converter = MissionLaneConverterNode(options);
 
   autoware_planning_msgs::msg::MissionLanesStamped mission_msg;
 
@@ -28,12 +41,12 @@ int TestMissionToTrajectory()
 
   // Get converted trajectory
   std::tuple<
-    autoware_auto_planning_msgs::msg::Trajectory, visualization_msgs::msg::Marker,
-    autoware_auto_planning_msgs::msg::Path, visualization_msgs::msg::MarkerArray>
+    autoware_planning_msgs::msg::Trajectory, visualization_msgs::msg::Marker,
+    autoware_planning_msgs::msg::Path, visualization_msgs::msg::MarkerArray>
     mission_to_trj = mission_converter.ConvertMissionToTrajectory(mission_msg);
 
   // Extract trajectory
-  autoware_auto_planning_msgs::msg::Trajectory trj_msg = std::get<0>(mission_to_trj);
+  autoware_planning_msgs::msg::Trajectory trj_msg = std::get<0>(mission_to_trj);
 
   EXPECT_EQ(trj_msg.points.back().pose.position.x, mission_msg.ego_lane.centerline.back().x);
   EXPECT_EQ(trj_msg.points.back().pose.position.y, mission_msg.ego_lane.centerline.back().y);
