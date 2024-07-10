@@ -16,9 +16,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   DEPENDENCIES
     geometry_msgs
     std_msgs
-    unique_identifier_msgs
     nav_msgs
-    builtin_interfaces
   ADD_LINTER_TESTS
 )
 
