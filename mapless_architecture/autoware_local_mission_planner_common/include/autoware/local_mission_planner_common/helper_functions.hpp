@@ -21,12 +21,12 @@
 #include "tf2_ros/buffer.h"
 #include "tf2_ros/transform_listener.h"
 
-#include "autoware_planning_msgs/msg/driving_corridor.hpp"
-#include "autoware_planning_msgs/msg/local_map.hpp"
-#include "autoware_planning_msgs/msg/mission.hpp"
-#include "autoware_planning_msgs/msg/mission_lanes_stamped.hpp"
-#include "autoware_planning_msgs/msg/road_segments.hpp"
-#include "autoware_planning_msgs/msg/visualization_distance.hpp"
+#include "autoware_mapless_planning_msgs/msg/driving_corridor.hpp"
+#include "autoware_mapless_planning_msgs/msg/local_map.hpp"
+#include "autoware_mapless_planning_msgs/msg/mission.hpp"
+#include "autoware_mapless_planning_msgs/msg/mission_lanes_stamped.hpp"
+#include "autoware_mapless_planning_msgs/msg/road_segments.hpp"
+#include "autoware_mapless_planning_msgs/msg/visualization_distance.hpp"
 #include "geometry_msgs/msg/point.hpp"
 #include "geometry_msgs/msg/pose.hpp"
 #include "visualization_msgs/msg/marker.hpp"
@@ -306,7 +306,7 @@ visualization_msgs::msg::MarkerArray CreateMarkerArray(
   const std::vector<lanelet::ConstLineString3d> & centerline,
   const std::vector<lanelet::ConstLineString3d> & left,
   const std::vector<lanelet::ConstLineString3d> & right,
-  const autoware_planning_msgs::msg::RoadSegments & msg);
+  const autoware_mapless_planning_msgs::msg::RoadSegments & msg);
 
 /**
  * @brief Create a DrivingCorridor object.
@@ -314,9 +314,9 @@ visualization_msgs::msg::MarkerArray CreateMarkerArray(
  * @param lane The lane which is a std::vector<int> containing all the indices
  * of the lane.
  * @param converted_lanelets The lanelets (std::vector<lanelet::Lanelet>).
- * @return autoware_planning_msgs::msg::DrivingCorridor
+ * @return autoware_mapless_planning_msgs::msg::DrivingCorridor
  */
-autoware_planning_msgs::msg::DrivingCorridor CreateDrivingCorridor(
+autoware_mapless_planning_msgs::msg::DrivingCorridor CreateDrivingCorridor(
   const std::vector<int> & lane, const std::vector<lanelet::Lanelet> & converted_lanelets);
 
 /**

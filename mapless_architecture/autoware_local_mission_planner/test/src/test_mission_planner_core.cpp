@@ -26,14 +26,14 @@ namespace autoware::mapless_architecture
 {
 // Note: Lanelets and Segments are basically the same!
 
-autoware_planning_msgs::msg::RoadSegments CreateSegments()
+autoware_mapless_planning_msgs::msg::RoadSegments CreateSegments()
 {
   // Local variables
   const int n_segments = 3;
 
   // Fill lanelet2 message
-  autoware_planning_msgs::msg::RoadSegments message;
-  std::vector<autoware_planning_msgs::msg::Segment> lanelet_vec(n_segments);
+  autoware_mapless_planning_msgs::msg::RoadSegments message;
+  std::vector<autoware_mapless_planning_msgs::msg::Segment> lanelet_vec(n_segments);
   message.segments = lanelet_vec;
 
   // Global position
@@ -144,7 +144,7 @@ int TestCalculateDistanceBetweenPointAndLineString()
 int TestGetPointOnLane()
 {
   // Create some example segments
-  autoware_planning_msgs::msg::RoadSegments road_segments = CreateSegments();
+  autoware_mapless_planning_msgs::msg::RoadSegments road_segments = CreateSegments();
 
   // Initialize MissionPlannerNode
   rclcpp::NodeOptions options;
@@ -179,7 +179,7 @@ int TestGetPointOnLane()
 int TestIsOnGoalLane()
 {
   // Create some example segments
-  autoware_planning_msgs::msg::RoadSegments road_segments = CreateSegments();
+  autoware_mapless_planning_msgs::msg::RoadSegments road_segments = CreateSegments();
 
   // Initialize MissionPlannerNode
   rclcpp::NodeOptions options;
@@ -212,14 +212,14 @@ int TestIsOnGoalLane()
   return 0;
 }
 
-autoware_planning_msgs::msg::RoadSegments GetTestRoadModelForRecenterTests()
+autoware_mapless_planning_msgs::msg::RoadSegments GetTestRoadModelForRecenterTests()
 {
   // local variables
   const int n_segments = 2;
 
   // Fill lanelet2 message
-  autoware_planning_msgs::msg::RoadSegments message;
-  std::vector<autoware_planning_msgs::msg::Segment> lanelet_vec(n_segments);
+  autoware_mapless_planning_msgs::msg::RoadSegments message;
+  std::vector<autoware_mapless_planning_msgs::msg::Segment> lanelet_vec(n_segments);
   message.segments = lanelet_vec;
 
   // Global position
@@ -286,7 +286,7 @@ int TestRecenterGoalpoint()
   MissionPlannerNode mission_planner = MissionPlannerNode(options);
 
   // Get a local road model for testing
-  autoware_planning_msgs::msg::RoadSegments road_segments = GetTestRoadModelForRecenterTests();
+  autoware_mapless_planning_msgs::msg::RoadSegments road_segments = GetTestRoadModelForRecenterTests();
 
   // Used for the output
   std::vector<LaneletConnection> lanelet_connections;
@@ -351,9 +351,9 @@ int TestRecenterGoalpoint()
 int TestCheckIfGoalPointShouldBeReset()
 {
   // Create some example segments
-  autoware_planning_msgs::msg::RoadSegments road_segments = CreateSegments();
+  autoware_mapless_planning_msgs::msg::RoadSegments road_segments = CreateSegments();
 
-  autoware_planning_msgs::msg::LocalMap local_map;
+  autoware_mapless_planning_msgs::msg::LocalMap local_map;
   local_map.road_segments = road_segments;
 
   // Initialize MissionPlannerNode
@@ -375,8 +375,8 @@ int TestCheckIfGoalPointShouldBeReset()
   MissionPlanner.goal_point(point);
 
   // Set a non-default mission to make the goal point reset work
-  autoware_planning_msgs::msg::Mission mission_msg;
-  mission_msg.mission_type = autoware_planning_msgs::msg::Mission::LANE_CHANGE_LEFT;
+  autoware_mapless_planning_msgs::msg::Mission mission_msg;
+  mission_msg.mission_type = autoware_mapless_planning_msgs::msg::Mission::LANE_CHANGE_LEFT;
   MissionPlanner.CallbackMissionMessages_(mission_msg);
 
   // Call function which is tested
@@ -392,7 +392,7 @@ int TestCheckIfGoalPointShouldBeReset()
   MissionPlanner.goal_point(point);
 
   // Set a non-default mission to make the goal point reset work
-  mission_msg.mission_type = autoware_planning_msgs::msg::Mission::LANE_KEEP;
+  mission_msg.mission_type = autoware_mapless_planning_msgs::msg::Mission::LANE_KEEP;
   MissionPlanner.CallbackMissionMessages_(mission_msg);
 
   // Call function which is tested
@@ -413,8 +413,8 @@ std::tuple<std::vector<lanelet::Lanelet>, std::vector<LaneletConnection>> Create
   const int n_segments = 2;
 
   // Fill lanelet2 message
-  autoware_planning_msgs::msg::RoadSegments message;
-  std::vector<autoware_planning_msgs::msg::Segment> lanelet_vec(n_segments);
+  autoware_mapless_planning_msgs::msg::RoadSegments message;
+  std::vector<autoware_mapless_planning_msgs::msg::Segment> lanelet_vec(n_segments);
   message.segments = lanelet_vec;
 
   // Global position
@@ -533,7 +533,7 @@ int TestCreateMarkerArray()
   MissionPlannerNode MissionPlanner = MissionPlannerNode(options);
 
   // Create empty message
-  autoware_planning_msgs::msg::RoadSegments message;
+  autoware_mapless_planning_msgs::msg::RoadSegments message;
 
   // Calculate centerlines, left and right bounds
   std::vector<lanelet::ConstLineString3d> centerlines;
@@ -580,7 +580,7 @@ int TestCreateDrivingCorridor()
   MissionPlannerNode MissionPlanner = MissionPlannerNode(options);
 
   // Call function which is tested
-  autoware_planning_msgs::msg::DrivingCorridor driving_corridor =
+  autoware_mapless_planning_msgs::msg::DrivingCorridor driving_corridor =
     CreateDrivingCorridor({0, 1}, lanelets);
 
   // Check if x value of first point in centerline is -2.0

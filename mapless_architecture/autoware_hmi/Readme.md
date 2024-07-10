@@ -20,7 +20,7 @@ ros2 param set /mission_planner/hmi mission LANE_CHANGE_RIGHT
 
 | Name                      | Type                                 | Description |
 | ------------------------- | ------------------------------------ | ----------- |
-| `hmi_node/output/mission` | autoware_planning_msgs::msg::Mission | mission     |
+| `hmi_node/output/mission` | autoware_mapless_planning_msgs::msg::Mission | mission     |
 
 ## Node parameters
 

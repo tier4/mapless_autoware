@@ -30,19 +30,19 @@ LocalMapProviderNode::LocalMapProviderNode(const rclcpp::NodeOptions & options)
   qos.best_effort();
 
   // Initialize publisher for local map
-  map_publisher_ = this->create_publisher<autoware_planning_msgs::msg::LocalMap>(
+  map_publisher_ = this->create_publisher<autoware_mapless_planning_msgs::msg::LocalMap>(
     "local_map_provider_node/output/local_map", 1);
 
   // Initialize subscriber to road segments messages
-  road_subscriber_ = this->create_subscription<autoware_planning_msgs::msg::RoadSegments>(
+  road_subscriber_ = this->create_subscription<autoware_mapless_planning_msgs::msg::RoadSegments>(
     "local_map_provider_node/input/road_segments", qos,
     std::bind(&LocalMapProviderNode::CallbackRoadSegmentsMessages_, this, _1));
 }
 
 void LocalMapProviderNode::CallbackRoadSegmentsMessages_(
-  const autoware_planning_msgs::msg::RoadSegments & msg)
+  const autoware_mapless_planning_msgs::msg::RoadSegments & msg)
 {
-  autoware_planning_msgs::msg::LocalMap local_map;
+  autoware_mapless_planning_msgs::msg::LocalMap local_map;
 
   // Save road segments in the local map message
   local_map.road_segments = msg;

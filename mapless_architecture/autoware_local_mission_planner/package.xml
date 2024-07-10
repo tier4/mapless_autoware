@@ -12,7 +12,7 @@
   <exec_depend>ros2launch</exec_depend>
 
   <depend>autoware_local_mission_planner_common</depend>
-  <depend>autoware_planning_msgs</depend>
+  <depend>autoware_mapless_planning_msgs</depend>
   <depend>builtin_interfaces</depend>
   <depend>geometry_msgs</depend>
   <depend>lanelet2_core</depend>

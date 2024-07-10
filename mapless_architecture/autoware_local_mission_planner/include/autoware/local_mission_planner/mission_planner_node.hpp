@@ -21,11 +21,11 @@
 #include "tf2_ros/buffer.h"
 #include "tf2_ros/transform_listener.h"
 
-#include "autoware_planning_msgs/msg/driving_corridor.hpp"
-#include "autoware_planning_msgs/msg/local_map.hpp"
-#include "autoware_planning_msgs/msg/mission.hpp"
-#include "autoware_planning_msgs/msg/mission_lanes_stamped.hpp"
-#include "autoware_planning_msgs/msg/visualization_distance.hpp"
+#include "autoware_mapless_planning_msgs/msg/driving_corridor.hpp"
+#include "autoware_mapless_planning_msgs/msg/local_map.hpp"
+#include "autoware_mapless_planning_msgs/msg/mission.hpp"
+#include "autoware_mapless_planning_msgs/msg/mission_lanes_stamped.hpp"
+#include "autoware_mapless_planning_msgs/msg/visualization_distance.hpp"
 #include "geometry_msgs/msg/point.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
@@ -126,26 +126,26 @@ public:
   /**
    * @brief The callback for the Mission messages.
    *
-   * @param msg The autoware_planning_msgs::msg::Mission message.
+   * @param msg The autoware_mapless_planning_msgs::msg::Mission message.
    */
-  void CallbackMissionMessages_(const autoware_planning_msgs::msg::Mission & msg);
+  void CallbackMissionMessages_(const autoware_mapless_planning_msgs::msg::Mission & msg);
 
   /**
    * @brief The callback for the LocalMap messages.
    *
-   * @param msg The autoware_planning_msgs::msg::LocalMap message.
+   * @param msg The autoware_mapless_planning_msgs::msg::LocalMap message.
    */
-  void CallbackLocalMapMessages_(const autoware_planning_msgs::msg::LocalMap & msg);
+  void CallbackLocalMapMessages_(const autoware_mapless_planning_msgs::msg::LocalMap & msg);
 
   /**
    * @brief Convert RoadSegments into lanelets.
    *
-   * @param msg The message (autoware_planning_msgs::msg::RoadSegments).
+   * @param msg The message (autoware_mapless_planning_msgs::msg::RoadSegments).
    * @param out_lanelets The lanelets (output).
    * @param out_lanelet_connections The lanelet connections (output).
    */
   void ConvertInput2LaneletFormat(
-    const autoware_planning_msgs::msg::RoadSegments & msg,
+    const autoware_mapless_planning_msgs::msg::RoadSegments & msg,
     std::vector<lanelet::Lanelet> & out_lanelets,
     std::vector<LaneletConnection> & out_lanelet_connections);
 
@@ -179,22 +179,22 @@ public:
   /**
    * @brief Function for the visualization of lanes.
    *
-   * @param msg The autoware_planning_msgs::msg::RoadSegments message.
+   * @param msg The autoware_mapless_planning_msgs::msg::RoadSegments message.
    * @param converted_lanelets The lanelets (std::vector<lanelet::Lanelet>).
    */
   void VisualizeLanes(
-    const autoware_planning_msgs::msg::RoadSegments & msg,
+    const autoware_mapless_planning_msgs::msg::RoadSegments & msg,
     const std::vector<lanelet::Lanelet> & converted_lanelets);
 
   /**
    * @brief Function for the visualization of the centerline of a driving corridor.
    *
-   * @param msg The autoware_planning_msgs::msg::RoadSegments message.
+   * @param msg The autoware_mapless_planning_msgs::msg::RoadSegments message.
    * @param driving_corridor The considered driving corridor for which the centerline is visualized.
    */
   void VisualizeCenterlineOfDrivingCorridor(
-    const autoware_planning_msgs::msg::RoadSegments & msg,
-    const autoware_planning_msgs::msg::DrivingCorridor & driving_corridor);
+    const autoware_mapless_planning_msgs::msg::RoadSegments & msg,
+    const autoware_mapless_planning_msgs::msg::DrivingCorridor & driving_corridor);
 
 private:
   /**
@@ -214,21 +214,21 @@ private:
   void InitiateLaneChange_(const Direction direction, const std::vector<int> & neighboring_lane);
 
   //  Declare ROS2 publisher and subscriber
-  rclcpp::Subscription<autoware_planning_msgs::msg::LocalMap>::SharedPtr mapSubscriber_;
+  rclcpp::Subscription<autoware_mapless_planning_msgs::msg::LocalMap>::SharedPtr mapSubscriber_;
 
-  rclcpp::Subscription<autoware_planning_msgs::msg::Mission>::SharedPtr missionSubscriber_;
+  rclcpp::Subscription<autoware_mapless_planning_msgs::msg::Mission>::SharedPtr missionSubscriber_;
 
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr visualizationPublisher_;
 
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr
     visualization_publisher_centerline_;
 
-  rclcpp::Publisher<autoware_planning_msgs::msg::VisualizationDistance>::SharedPtr
+  rclcpp::Publisher<autoware_mapless_planning_msgs::msg::VisualizationDistance>::SharedPtr
     visualizationDistancePublisher_;
 
   rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr visualizationGoalPointPublisher_;
 
-  rclcpp::Publisher<autoware_planning_msgs::msg::MissionLanesStamped>::SharedPtr
+  rclcpp::Publisher<autoware_mapless_planning_msgs::msg::MissionLanesStamped>::SharedPtr
     missionLanesStampedPublisher_;
 
   rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr OdometrySubscriber_;

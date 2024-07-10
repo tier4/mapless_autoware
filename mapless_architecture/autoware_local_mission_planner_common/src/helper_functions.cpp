@@ -17,7 +17,7 @@
 #include "lanelet2_core/geometry/Lanelet.h"
 #include "rclcpp/rclcpp.hpp"
 
-#include "autoware_planning_msgs/msg/road_segments.hpp"
+#include "autoware_mapless_planning_msgs/msg/road_segments.hpp"
 
 namespace autoware::mapless_architecture
 {
@@ -439,7 +439,7 @@ visualization_msgs::msg::MarkerArray CreateMarkerArray(
   const std::vector<lanelet::ConstLineString3d> & centerline,
   const std::vector<lanelet::ConstLineString3d> & left,
   const std::vector<lanelet::ConstLineString3d> & right,
-  const autoware_planning_msgs::msg::RoadSegments & msg)
+  const autoware_mapless_planning_msgs::msg::RoadSegments & msg)
 {
   visualization_msgs::msg::MarkerArray markerArray;
 
@@ -519,11 +519,11 @@ visualization_msgs::msg::MarkerArray CreateMarkerArray(
   return markerArray;
 }
 
-autoware_planning_msgs::msg::DrivingCorridor CreateDrivingCorridor(
+autoware_mapless_planning_msgs::msg::DrivingCorridor CreateDrivingCorridor(
   const std::vector<int> & lane, const std::vector<lanelet::Lanelet> & converted_lanelets)
 {
   // Create driving corridor
-  autoware_planning_msgs::msg::DrivingCorridor driving_corridor;
+  autoware_mapless_planning_msgs::msg::DrivingCorridor driving_corridor;
 
   for (int id : lane) {
     if (id >= 0) {

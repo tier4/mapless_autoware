@@ -17,7 +17,7 @@
 
 #include "rclcpp/rclcpp.hpp"
 
-#include "autoware_planning_msgs/msg/mission.hpp"
+#include "autoware_mapless_planning_msgs/msg/mission.hpp"
 
 #include <string>
 #include <vector>
@@ -56,7 +56,7 @@ private:
 
   // Declare ROS2 publisher and subscriber
 
-  rclcpp::Publisher<autoware_planning_msgs::msg::Mission>::SharedPtr mission_publisher_;
+  rclcpp::Publisher<autoware_mapless_planning_msgs::msg::Mission>::SharedPtr mission_publisher_;
 
   rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr param_callback_handle_;
 };

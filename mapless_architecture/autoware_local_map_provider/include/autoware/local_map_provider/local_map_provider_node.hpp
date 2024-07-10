@@ -17,8 +17,8 @@
 
 #include "rclcpp/rclcpp.hpp"
 
-#include "autoware_planning_msgs/msg/local_map.hpp"
-#include "autoware_planning_msgs/msg/road_segments.hpp"
+#include "autoware_mapless_planning_msgs/msg/local_map.hpp"
+#include "autoware_mapless_planning_msgs/msg/road_segments.hpp"
 
 namespace autoware::mapless_architecture
 {
@@ -41,15 +41,15 @@ private:
   /**
    * @brief The callback for the RoadSegments messages.
    *
-   * @param msg The autoware_planning_msgs::msg::RoadSegments message.
+   * @param msg The autoware_mapless_planning_msgs::msg::RoadSegments message.
    */
-  void CallbackRoadSegmentsMessages_(const autoware_planning_msgs::msg::RoadSegments & msg);
+  void CallbackRoadSegmentsMessages_(const autoware_mapless_planning_msgs::msg::RoadSegments & msg);
 
   // Declare ROS2 publisher and subscriber
 
-  rclcpp::Publisher<autoware_planning_msgs::msg::LocalMap>::SharedPtr map_publisher_;
+  rclcpp::Publisher<autoware_mapless_planning_msgs::msg::LocalMap>::SharedPtr map_publisher_;
 
-  rclcpp::Subscription<autoware_planning_msgs::msg::RoadSegments>::SharedPtr road_subscriber_;
+  rclcpp::Subscription<autoware_mapless_planning_msgs::msg::RoadSegments>::SharedPtr road_subscriber_;
 };
 }  // namespace autoware::mapless_architecture
 

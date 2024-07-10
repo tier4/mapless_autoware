@@ -7,7 +7,7 @@ Converts the selected mission lane to an autoware trajectory.
 | Name                                         | Type                                             | Description   |
 | -------------------------------------------- | ------------------------------------------------ | ------------- |
 | `mission_lane_converter/input/odometry`      | nav_msgs::msg::Odometry                          | odometry      |
-| `mission_lane_converter/input/mission_lanes` | autoware_planning_msgs::msg::MissionLanesStamped | mission lanes |
+| `mission_lane_converter/input/mission_lanes` | autoware_mapless_planning_msgs::msg::MissionLanesStamped | mission lanes |
 
 ## Output topics
 

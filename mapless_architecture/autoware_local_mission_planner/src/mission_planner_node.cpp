@@ -20,9 +20,9 @@
 #include "lanelet2_core/geometry/LineString.h"
 #include "rclcpp/rclcpp.hpp"
 
-#include "autoware_planning_msgs/msg/driving_corridor.hpp"
-#include "autoware_planning_msgs/msg/mission.hpp"
-#include "autoware_planning_msgs/msg/mission_lanes_stamped.hpp"
+#include "autoware_mapless_planning_msgs/msg/driving_corridor.hpp"
+#include "autoware_mapless_planning_msgs/msg/mission.hpp"
+#include "autoware_mapless_planning_msgs/msg/mission_lanes_stamped.hpp"
 #include "geometry_msgs/msg/point.hpp"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
 #include "visualization_msgs/msg/marker.hpp"
@@ -62,7 +62,7 @@ MissionPlannerNode::MissionPlannerNode(const rclcpp::NodeOptions & options)
 
   // Initialize publisher for visualization of the distance
   visualizationDistancePublisher_ =
-    this->create_publisher<autoware_planning_msgs::msg::VisualizationDistance>(
+    this->create_publisher<autoware_mapless_planning_msgs::msg::VisualizationDistance>(
       "mission_planner_node/output/visualization_distance", 1);
 
   // Initialize publisher for goal point marker
@@ -71,16 +71,16 @@ MissionPlannerNode::MissionPlannerNode(const rclcpp::NodeOptions & options)
 
   // Initialize publisher for mission lanes
   missionLanesStampedPublisher_ =
-    this->create_publisher<autoware_planning_msgs::msg::MissionLanesStamped>(
+    this->create_publisher<autoware_mapless_planning_msgs::msg::MissionLanesStamped>(
       "mission_planner_node/output/mission_lanes_stamped", 1);
 
   // Initialize subscriber to lanelets stamped messages
-  mapSubscriber_ = this->create_subscription<autoware_planning_msgs::msg::LocalMap>(
+  mapSubscriber_ = this->create_subscription<autoware_mapless_planning_msgs::msg::LocalMap>(
     "mission_planner_node/input/local_map", qos,
     std::bind(&MissionPlannerNode::CallbackLocalMapMessages_, this, _1));
 
   // Initialize subscriber to mission messages
-  missionSubscriber_ = this->create_subscription<autoware_planning_msgs::msg::Mission>(
+  missionSubscriber_ = this->create_subscription<autoware_mapless_planning_msgs::msg::Mission>(
     "mission_planner/input/mission", qos,
     std::bind(&MissionPlannerNode::CallbackMissionMessages_, this, _1));
 
@@ -116,7 +116,7 @@ MissionPlannerNode::MissionPlannerNode(const rclcpp::NodeOptions & options)
 }
 
 void MissionPlannerNode::CallbackLocalMapMessages_(
-  const autoware_planning_msgs::msg::LocalMap & msg)
+  const autoware_mapless_planning_msgs::msg::LocalMap & msg)
 {
   // Used for output
   std::vector<LaneletConnection> lanelet_connections;
@@ -207,7 +207,7 @@ void MissionPlannerNode::CallbackLocalMapMessages_(
   visualization_publisher_centerline_->publish(clear_marker_array);
 
   // Publish mission lanes
-  autoware_planning_msgs::msg::MissionLanesStamped lanes;
+  autoware_mapless_planning_msgs::msg::MissionLanesStamped lanes;
   lanes.header.frame_id = msg.road_segments.header.frame_id;  // Same frame_id as msg
   lanes.header.stamp = rclcpp::Node::now();
 
@@ -242,7 +242,7 @@ void MissionPlannerNode::CallbackLocalMapMessages_(
   VisualizeCenterlineOfDrivingCorridor(msg.road_segments, lanes.ego_lane);
 
   // Initialize driving corridor
-  autoware_planning_msgs::msg::DrivingCorridor driving_corridor;
+  autoware_mapless_planning_msgs::msg::DrivingCorridor driving_corridor;
 
   if (!left_lanes.empty()) {
     for (const std::vector<int> & lane : left_lanes) {
@@ -366,36 +366,36 @@ void MissionPlannerNode::CallbackOdometryMessages_(const nav_msgs::msg::Odometry
   return;
 }
 
-void MissionPlannerNode::CallbackMissionMessages_(const autoware_planning_msgs::msg::Mission & msg)
+void MissionPlannerNode::CallbackMissionMessages_(const autoware_mapless_planning_msgs::msg::Mission & msg)
 {
   // Initialize variables
   lane_change_trigger_success_ = false;
   retry_attempts_ = 0;
 
   switch (msg.mission_type) {
-    case autoware_planning_msgs::msg::Mission::LANE_KEEP:
+    case autoware_mapless_planning_msgs::msg::Mission::LANE_KEEP:
       // Keep the lane
       mission_ = stay;
       target_lane_ = stay;
       break;
-    case autoware_planning_msgs::msg::Mission::LANE_CHANGE_LEFT:
+    case autoware_mapless_planning_msgs::msg::Mission::LANE_CHANGE_LEFT:
       // Initiate left lane change
       RCLCPP_INFO(this->get_logger(), "Lane change to the left initiated.");
       lane_change_direction_ = left;
       InitiateLaneChange_(lane_change_direction_, lane_left_);
       break;
-    case autoware_planning_msgs::msg::Mission::LANE_CHANGE_RIGHT:
+    case autoware_mapless_planning_msgs::msg::Mission::LANE_CHANGE_RIGHT:
       // Initiate right lane change
       RCLCPP_INFO(this->get_logger(), "Lane change to the right initiated.");
       lane_change_direction_ = right;
       InitiateLaneChange_(lane_change_direction_, lane_right_);
       break;
-    case autoware_planning_msgs::msg::Mission::TAKE_NEXT_EXIT_LEFT:
+    case autoware_mapless_planning_msgs::msg::Mission::TAKE_NEXT_EXIT_LEFT:
       // Initiate take next exit
       RCLCPP_INFO(this->get_logger(), "Take next exit (left) initiated.");
       target_lane_ = left_most;  // Set target lane
       break;
-    case autoware_planning_msgs::msg::Mission::TAKE_NEXT_EXIT_RIGHT:
+    case autoware_mapless_planning_msgs::msg::Mission::TAKE_NEXT_EXIT_RIGHT:
       // Initiate take next exit
       RCLCPP_INFO(this->get_logger(), "Take next exit (right) initiated.");
       target_lane_ = right_most;  // Set target lane
@@ -582,7 +582,7 @@ void MissionPlannerNode::goal_point(const lanelet::BasicPoint2d & goal_point)
 }
 
 void MissionPlannerNode::ConvertInput2LaneletFormat(
-  const autoware_planning_msgs::msg::RoadSegments & msg,
+  const autoware_mapless_planning_msgs::msg::RoadSegments & msg,
   std::vector<lanelet::Lanelet> & out_lanelets,
   std::vector<LaneletConnection> & out_lanelet_connections)
 {
@@ -719,7 +719,7 @@ double MissionPlannerNode::CalculateDistanceBetweenPointAndLineString(
   double distance = lanelet::geometry::distance2d(point, projected_point);
 
   // Publish distance
-  autoware_planning_msgs::msg::VisualizationDistance d;
+  autoware_mapless_planning_msgs::msg::VisualizationDistance d;
   d.distance = distance;
   visualizationDistancePublisher_->publish(d);
 
@@ -727,7 +727,7 @@ double MissionPlannerNode::CalculateDistanceBetweenPointAndLineString(
 }
 
 void MissionPlannerNode::VisualizeLanes(
-  const autoware_planning_msgs::msg::RoadSegments & msg,
+  const autoware_mapless_planning_msgs::msg::RoadSegments & msg,
   const std::vector<lanelet::Lanelet> & converted_lanelets)
 {
   // Calculate centerlines, left and right bounds
@@ -753,8 +753,8 @@ void MissionPlannerNode::VisualizeLanes(
 }
 
 void MissionPlannerNode::VisualizeCenterlineOfDrivingCorridor(
-  const autoware_planning_msgs::msg::RoadSegments & msg,
-  const autoware_planning_msgs::msg::DrivingCorridor & driving_corridor)
+  const autoware_mapless_planning_msgs::msg::RoadSegments & msg,
+  const autoware_mapless_planning_msgs::msg::DrivingCorridor & driving_corridor)
 {
   // Create a marker for the centerline
   visualization_msgs::msg::Marker centerline_marker;

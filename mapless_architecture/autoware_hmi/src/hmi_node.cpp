@@ -16,7 +16,7 @@
 
 #include "rclcpp/rclcpp.hpp"
 
-#include "autoware_planning_msgs/msg/mission.hpp"
+#include "autoware_mapless_planning_msgs/msg/mission.hpp"
 
 namespace autoware::mapless_architecture
 {
@@ -35,7 +35,7 @@ HMINode::HMINode(const rclcpp::NodeOptions & options) : Node("hmi_node", options
 
   // Initialize publisher
   mission_publisher_ =
-    this->create_publisher<autoware_planning_msgs::msg::Mission>("hmi_node/output/mission", 1);
+    this->create_publisher<autoware_mapless_planning_msgs::msg::Mission>("hmi_node/output/mission", 1);
 
   // Initialize parameters callback handle
   param_callback_handle_ = this->add_on_set_parameters_callback(
@@ -70,17 +70,17 @@ rcl_interfaces::msg::SetParametersResult HMINode::ParamCallback_(
 
 void HMINode::PublishMission_(std::string mission)
 {
-  autoware_planning_msgs::msg::Mission missionMessage;
+  autoware_mapless_planning_msgs::msg::Mission missionMessage;
   if (mission == "LANE_KEEP") {
-    missionMessage.mission_type = autoware_planning_msgs::msg::Mission::LANE_KEEP;
+    missionMessage.mission_type = autoware_mapless_planning_msgs::msg::Mission::LANE_KEEP;
   } else if (mission == "LANE_CHANGE_LEFT") {
-    missionMessage.mission_type = autoware_planning_msgs::msg::Mission::LANE_CHANGE_LEFT;
+    missionMessage.mission_type = autoware_mapless_planning_msgs::msg::Mission::LANE_CHANGE_LEFT;
   } else if (mission == "LANE_CHANGE_RIGHT") {
-    missionMessage.mission_type = autoware_planning_msgs::msg::Mission::LANE_CHANGE_RIGHT;
+    missionMessage.mission_type = autoware_mapless_planning_msgs::msg::Mission::LANE_CHANGE_RIGHT;
   } else if (mission == "TAKE_NEXT_EXIT_LEFT") {
-    missionMessage.mission_type = autoware_planning_msgs::msg::Mission::TAKE_NEXT_EXIT_LEFT;
+    missionMessage.mission_type = autoware_mapless_planning_msgs::msg::Mission::TAKE_NEXT_EXIT_LEFT;
   } else if (mission == "TAKE_NEXT_EXIT_RIGHT") {
-    missionMessage.mission_type = autoware_planning_msgs::msg::Mission::TAKE_NEXT_EXIT_RIGHT;
+    missionMessage.mission_type = autoware_mapless_planning_msgs::msg::Mission::TAKE_NEXT_EXIT_RIGHT;
   }
 
   // TODO(simon.eisenmann@driveblocks.ai): Change deadline parameter
