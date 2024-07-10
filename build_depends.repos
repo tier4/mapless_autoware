@@ -6,8 +6,4 @@ repositories:
   dependencies/autoware_common:
     type: git
     url: https://github.com/autowarefoundation/autoware_common.git
-    version: remove-autoware-cmake-utils
-  dependencies/autoware_cmake:
-    type: git
-    url: https://github.com/autowarefoundation/autoware_cmake.git
     version: main
