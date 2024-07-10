@@ -67,6 +67,19 @@ private:
 };
 
 /**
+ * @brief A class for an ID.
+ */
+class ID
+{
+public:
+  ID() : value_(0) {}
+  unsigned int ReturnIDAndIncrement();
+
+private:
+  unsigned int value_;
+};
+
+/**
  * Represent a 2D pose (pose_prev) in a new origin / coordinate system, which
  * is given in relation to the previous coordinate system / origin
  * (cosy_rel).
