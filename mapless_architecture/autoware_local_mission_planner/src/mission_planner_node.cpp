@@ -51,19 +51,10 @@ MissionPlannerNode::MissionPlannerNode(const rclcpp::NodeOptions & options)
   auto qos = rclcpp::QoS(1);
   qos.best_effort();
 
-  // Initialize publisher for visualization markers
-  visualizationPublisher_ = this->create_publisher<visualization_msgs::msg::MarkerArray>(
-    "mission_planner_node/output/marker", 1);
-
   // Initialize publisher to visualize the centerline of a lane
   visualization_publisher_centerline_ =
     this->create_publisher<visualization_msgs::msg::MarkerArray>(
       "mission_planner_node/output/centerline", 1);
-
-  // Initialize publisher for visualization of the distance
-  visualizationDistancePublisher_ =
-    this->create_publisher<autoware_mapless_planning_msgs::msg::VisualizationDistance>(
-      "mission_planner_node/output/visualization_distance", 1);
 
   // Initialize publisher for goal point marker
   visualizationGoalPointPublisher_ = this->create_publisher<visualization_msgs::msg::Marker>(
@@ -130,7 +121,6 @@ void MissionPlannerNode::CallbackLocalMapMessages_(
   std::vector<lanelet::Lanelet> converted_lanelets;
 
   ConvertInput2LaneletFormat(msg.road_segments, converted_lanelets, lanelet_connections);
-  VisualizeLanes(msg.road_segments, converted_lanelets);
 
   // Get the lanes
   Lanes result = MissionPlannerNode::CalculateLanes_(converted_lanelets, lanelet_connections);
@@ -733,38 +723,7 @@ double MissionPlannerNode::CalculateDistanceBetweenPointAndLineString(
   // Calculate the distance between the two points
   double distance = lanelet::geometry::distance2d(point, projected_point);
 
-  // Publish distance
-  autoware_mapless_planning_msgs::msg::VisualizationDistance d;
-  d.distance = distance;
-  visualizationDistancePublisher_->publish(d);
-
   return distance;
-}
-
-void MissionPlannerNode::VisualizeLanes(
-  const autoware_mapless_planning_msgs::msg::RoadSegments & msg,
-  const std::vector<lanelet::Lanelet> & converted_lanelets)
-{
-  // Calculate centerlines, left and right bounds
-  std::vector<lanelet::ConstLineString3d> centerlines;
-  std::vector<lanelet::ConstLineString3d> left_bounds;
-  std::vector<lanelet::ConstLineString3d> right_bounds;
-
-  // Go through every lanelet
-  for (const lanelet::Lanelet & l : converted_lanelets) {
-    auto centerline = l.centerline();
-    auto bound_left = l.leftBound();
-    auto bound_right = l.rightBound();
-
-    centerlines.push_back(centerline);
-    left_bounds.push_back(bound_left);
-    right_bounds.push_back(bound_right);
-  }
-
-  auto marker_array = CreateMarkerArray(centerlines, left_bounds, right_bounds, msg);
-
-  // Publish centerlines, left and right bounds
-  visualizationPublisher_->publish(marker_array);
 }
 
 void MissionPlannerNode::VisualizeCenterlineOfDrivingCorridor(

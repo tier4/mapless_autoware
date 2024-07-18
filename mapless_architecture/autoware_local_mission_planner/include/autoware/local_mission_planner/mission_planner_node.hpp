@@ -177,16 +177,6 @@ public:
     const lanelet::ConstLineString2d & linestring, const lanelet::BasicPoint2d & point);
 
   /**
-   * @brief Function for the visualization of lanes.
-   *
-   * @param msg The autoware_mapless_planning_msgs::msg::RoadSegments message.
-   * @param converted_lanelets The lanelets (std::vector<lanelet::Lanelet>).
-   */
-  void VisualizeLanes(
-    const autoware_mapless_planning_msgs::msg::RoadSegments & msg,
-    const std::vector<lanelet::Lanelet> & converted_lanelets);
-
-  /**
    * @brief Function for the visualization of the centerline of a driving corridor.
    *
    * @param msg The autoware_mapless_planning_msgs::msg::RoadSegments message.
@@ -218,20 +208,15 @@ private:
 
   rclcpp::Subscription<autoware_mapless_planning_msgs::msg::Mission>::SharedPtr missionSubscriber_;
 
-  rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr visualizationPublisher_;
+  rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr OdometrySubscriber_;
 
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr
     visualization_publisher_centerline_;
-
-  rclcpp::Publisher<autoware_mapless_planning_msgs::msg::VisualizationDistance>::SharedPtr
-    visualizationDistancePublisher_;
 
   rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr visualizationGoalPointPublisher_;
 
   rclcpp::Publisher<autoware_mapless_planning_msgs::msg::MissionLanesStamped>::SharedPtr
     missionLanesStampedPublisher_;
-
-  rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr OdometrySubscriber_;
 
   // ROS buffer interface (for TF transforms)
   std::unique_ptr<tf2_ros::Buffer> tf_buffer_;
