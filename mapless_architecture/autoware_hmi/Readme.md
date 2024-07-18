@@ -13,7 +13,7 @@ Available missions:
 Interact with this node by changing the ROS parameters. For a lane change to the right use this command in the terminal:
 
 ```bash
-ros2 param set /mission_planner/hmi mission LANE_CHANGE_RIGHT
+ros2 param set /mapless_architecture/autoware_hmi mission LANE_CHANGE_RIGHT
 ```
 
 ## Output topics
