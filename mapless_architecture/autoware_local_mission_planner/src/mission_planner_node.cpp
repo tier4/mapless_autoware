@@ -14,29 +14,8 @@
 
 #include "autoware/local_mission_planner/mission_planner_node.hpp"
 
-#include "autoware/local_mission_planner_common/helper_functions.hpp"
 #include "lanelet2_core/LaneletMap.h"
 #include "lanelet2_core/geometry/Lanelet.h"
-#include "lanelet2_core/geometry/LineString.h"
-#include "rclcpp/rclcpp.hpp"
-
-#include "autoware_mapless_planning_msgs/msg/driving_corridor.hpp"
-#include "autoware_mapless_planning_msgs/msg/mission.hpp"
-#include "autoware_mapless_planning_msgs/msg/mission_lanes_stamped.hpp"
-#include "geometry_msgs/msg/point.hpp"
-#include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
-#include "visualization_msgs/msg/marker.hpp"
-#include "visualization_msgs/msg/marker_array.hpp"
-
-#include <chrono>
-#include <limits>
-#include <list>
-#include <map>
-#include <memory>
-#include <string>
-#include <tuple>
-#include <unordered_map>
-#include <vector>
 
 namespace autoware::mapless_architecture
 {
@@ -45,9 +24,8 @@ using std::placeholders::_1;
 MissionPlannerNode::MissionPlannerNode(const rclcpp::NodeOptions & options)
 : Node("mission_planner_node", options)
 {
-  // Set quality of service to best effort (if transmission fails, do not try to
-  // resend but rather use new sensor data)
-  // the history_depth is set to 1 (message queue size)
+  // Set quality of service to best effort (if transmission fails, do not try to resend but rather
+  // use new sensor data), the history_depth is set to 1 (message queue size)
   auto qos = rclcpp::QoS(1);
   qos.best_effort();
 
@@ -65,26 +43,26 @@ MissionPlannerNode::MissionPlannerNode(const rclcpp::NodeOptions & options)
     this->create_publisher<autoware_mapless_planning_msgs::msg::MissionLanesStamped>(
       "mission_planner_node/output/mission_lanes_stamped", 1);
 
-  // Initialize subscriber to lanelets stamped messages
+  // Initialize subscriber to local map messages
   mapSubscriber_ = this->create_subscription<autoware_mapless_planning_msgs::msg::LocalMap>(
     "mission_planner_node/input/local_map", qos,
-    std::bind(&MissionPlannerNode::CallbackLocalMapMessages_, this, _1));
+    std::bind(&MissionPlannerNode::CallbackLocalMapMessages, this, _1));
 
   // Initialize subscriber to mission messages
   missionSubscriber_ = this->create_subscription<autoware_mapless_planning_msgs::msg::Mission>(
     "mission_planner/input/mission", qos,
-    std::bind(&MissionPlannerNode::CallbackMissionMessages_, this, _1));
+    std::bind(&MissionPlannerNode::CallbackMissionMessages, this, _1));
 
   // Initialize subscriber to odometry messages
   OdometrySubscriber_ = this->create_subscription<nav_msgs::msg::Odometry>(
     "mission_planner/input/state_estimate", qos,
-    std::bind(&MissionPlannerNode::CallbackOdometryMessages_, this, _1));
+    std::bind(&MissionPlannerNode::CallbackOdometryMessages, this, _1));
 
+  // Initialize tf2 buffer and listener
   tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
   tf_listener_ = std::make_unique<tf2_ros::TransformListener>(*tf_buffer_);
 
-  // Set ros parameters (DEFAULT values will be overwritten by external
-  // parameter file)
+  // Set ros parameters (DEFAULT values will be overwritten by external parameter file)
   distance_to_centerline_threshold_ =
     declare_parameter<float>("distance_to_centerline_threshold", 0.2);
   RCLCPP_INFO(
@@ -113,7 +91,7 @@ MissionPlannerNode::MissionPlannerNode(const rclcpp::NodeOptions & options)
     recenter_period_);
 }
 
-void MissionPlannerNode::CallbackLocalMapMessages_(
+void MissionPlannerNode::CallbackLocalMapMessages(
   const autoware_mapless_planning_msgs::msg::LocalMap & msg)
 {
   // Used for output
@@ -123,7 +101,7 @@ void MissionPlannerNode::CallbackLocalMapMessages_(
   ConvertInput2LaneletFormat(msg.road_segments, converted_lanelets, lanelet_connections);
 
   // Get the lanes
-  Lanes result = MissionPlannerNode::CalculateLanes_(converted_lanelets, lanelet_connections);
+  Lanes result = MissionPlannerNode::CalculateLanes(converted_lanelets, lanelet_connections);
 
   // Get the ego lane
   ego_lane_ = result.ego;
@@ -145,10 +123,10 @@ void MissionPlannerNode::CallbackLocalMapMessages_(
   if (lane_change_trigger_success_ == false && retry_attempts_ <= retrigger_attempts_max_) {
     if (lane_change_direction_ == left) {
       // Lane change to the left
-      InitiateLaneChange_(left, lane_left_);
+      InitiateLaneChange(left, lane_left_);
     } else if (lane_change_direction_ == right) {
       // Lane change to the right
-      InitiateLaneChange_(right, lane_right_);
+      InitiateLaneChange(right, lane_right_);
     }
   }
 
@@ -164,20 +142,20 @@ void MissionPlannerNode::CallbackLocalMapMessages_(
   }
 
   // Check if goal point should be reset, if yes -> reset goal point
-  CheckIfGoalPointShouldBeReset_(converted_lanelets, lanelet_connections);
+  CheckIfGoalPointShouldBeReset(converted_lanelets, lanelet_connections);
 
   // Check if lane change was successful, if yes -> reset mission
   if (mission_ != stay) {
-    int egoLaneletIndex = FindEgoOccupiedLaneletID(converted_lanelets);  // Returns -1 if no match
+    int ego_lanelet_index = FindEgoOccupiedLaneletID(converted_lanelets);  // Returns -1 if no match
     lanelet::BasicPoint2d pointEgo(0,
                                    0);  // Vehicle is always located at (0, 0)
 
-    if (egoLaneletIndex >= 0) {
+    if (ego_lanelet_index >= 0) {
       // Check if successful lane change
       if (
-        IsOnGoalLane_(egoLaneletIndex, goal_point_, converted_lanelets, lanelet_connections) &&
+        IsOnGoalLane(ego_lanelet_index, goal_point_, converted_lanelets, lanelet_connections) &&
         CalculateDistanceBetweenPointAndLineString(
-          converted_lanelets[egoLaneletIndex].centerline2d(), pointEgo) <=
+          converted_lanelets[ego_lanelet_index].centerline2d(), pointEgo) <=
           distance_to_centerline_threshold_) {
         // Reset mission to lane keeping
         mission_ = stay;
@@ -185,7 +163,7 @@ void MissionPlannerNode::CallbackLocalMapMessages_(
       }
 
       // Check if we are on the target lane, if yes -> update target_lane
-      if (IsOnGoalLane_(egoLaneletIndex, goal_point_, converted_lanelets, lanelet_connections)) {
+      if (IsOnGoalLane(ego_lanelet_index, goal_point_, converted_lanelets, lanelet_connections)) {
         target_lane_ = stay;
       } else {
         target_lane_ = mission_;
@@ -225,7 +203,6 @@ void MissionPlannerNode::CallbackLocalMapMessages_(
     case right_most:
       lanes.target_lane = +2;
       break;
-
     default:
       break;
   }
@@ -259,7 +236,7 @@ void MissionPlannerNode::CallbackLocalMapMessages_(
   missionLanesStampedPublisher_->publish(lanes);
 }
 
-void MissionPlannerNode::CallbackOdometryMessages_(const nav_msgs::msg::Odometry & msg)
+void MissionPlannerNode::CallbackOdometryMessages(const nav_msgs::msg::Odometry & msg)
 {
   // Construct raw odometry pose
   geometry_msgs::msg::PoseStamped odometry_pose_raw;
@@ -303,10 +280,9 @@ void MissionPlannerNode::CallbackOdometryMessages_(const nav_msgs::msg::Odometry
     goal_point_.x() = target_pose.get_x();
     goal_point_.y() = target_pose.get_y();
 
-    // Recenter updated goal point to lie on centerline (to get rid of issues
-    // with a less accurate odometry update which could lead to loosing the
-    // goal lane), recenter only after a certain number of steps (recenter_period_) to reduce the
-    // calling frequency
+    // Recenter updated goal point to lie on centerline (to get rid of issues with a less accurate
+    // odometry update which could lead to loosing the goal lane), recenter only after a certain
+    // number of steps (recenter_period_) to reduce the calling frequency
     if (recenter_counter_ >= recenter_period_) {
       const lanelet::BasicPoint2d target_point_2d =
         RecenterGoalPoint(goal_point_, current_lanelets_);
@@ -320,8 +296,7 @@ void MissionPlannerNode::CallbackOdometryMessages_(const nav_msgs::msg::Odometry
       recenter_counter_++;
     }
 
-    // --- Start of debug visualization
-    // Create marker and publish it
+    // Create marker for the goal point and publish it
     visualization_msgs::msg::Marker goal_marker;  // Create a new marker
 
     goal_marker.header.frame_id = msg.header.frame_id;
@@ -346,12 +321,12 @@ void MissionPlannerNode::CallbackOdometryMessages_(const nav_msgs::msg::Odometry
     visualization_msgs::msg::Marker msg_marker;
     msg_marker.header = msg.header;
     msg_marker.type = visualization_msgs::msg::Marker::POINTS;
+
     // This specifies the clear all / delete all action
     msg_marker.action = 3;
     visualizationGoalPointPublisher_->publish(msg_marker);
 
     visualizationGoalPointPublisher_->publish(goal_marker);
-    // --- End of debug visualization
 
     last_odom_msg_ = msg;
   } else {
@@ -369,7 +344,7 @@ void MissionPlannerNode::CallbackOdometryMessages_(const nav_msgs::msg::Odometry
   return;
 }
 
-void MissionPlannerNode::CallbackMissionMessages_(
+void MissionPlannerNode::CallbackMissionMessages(
   const autoware_mapless_planning_msgs::msg::Mission & msg)
 {
   // Initialize variables
@@ -386,13 +361,13 @@ void MissionPlannerNode::CallbackMissionMessages_(
       // Initiate left lane change
       RCLCPP_INFO(this->get_logger(), "Lane change to the left initiated.");
       lane_change_direction_ = left;
-      InitiateLaneChange_(lane_change_direction_, lane_left_);
+      InitiateLaneChange(lane_change_direction_, lane_left_);
       break;
     case autoware_mapless_planning_msgs::msg::Mission::LANE_CHANGE_RIGHT:
       // Initiate right lane change
       RCLCPP_INFO(this->get_logger(), "Lane change to the right initiated.");
       lane_change_direction_ = right;
-      InitiateLaneChange_(lane_change_direction_, lane_right_);
+      InitiateLaneChange(lane_change_direction_, lane_right_);
       break;
     case autoware_mapless_planning_msgs::msg::Mission::TAKE_NEXT_EXIT_LEFT:
       // Initiate take next exit
@@ -414,7 +389,7 @@ void MissionPlannerNode::CallbackMissionMessages_(
   return;
 }
 
-void MissionPlannerNode::InitiateLaneChange_(
+void MissionPlannerNode::InitiateLaneChange(
   const Direction direction, const std::vector<int> & neighboring_lane)
 {
   retry_attempts_++;  // Increment retry attempts counter
@@ -432,8 +407,7 @@ void MissionPlannerNode::InitiateLaneChange_(
   }
 }
 
-// Determine the lanes
-Lanes MissionPlannerNode::CalculateLanes_(
+Lanes MissionPlannerNode::CalculateLanes(
   const std::vector<lanelet::Lanelet> & converted_lanelets,
   std::vector<LaneletConnection> & lanelet_connections)
 {
@@ -517,7 +491,7 @@ Lanes MissionPlannerNode::CalculateLanes_(
   return lanes;
 }
 
-bool MissionPlannerNode::IsOnGoalLane_(
+bool MissionPlannerNode::IsOnGoalLane(
   const int ego_lanelet_index, const lanelet::BasicPoint2d & goal_point,
   const std::vector<lanelet::Lanelet> & converted_lanelets,
   const std::vector<LaneletConnection> & lanelet_connections)
@@ -548,7 +522,7 @@ bool MissionPlannerNode::IsOnGoalLane_(
   return result;
 }
 
-void MissionPlannerNode::CheckIfGoalPointShouldBeReset_(
+void MissionPlannerNode::CheckIfGoalPointShouldBeReset(
   const lanelet::Lanelets & converted_lanelets,
   const std::vector<LaneletConnection> & lanelet_connections)
 {
@@ -593,8 +567,10 @@ void MissionPlannerNode::ConvertInput2LaneletFormat(
 {
   // Local variables
   const unsigned int n_linestrings_per_lanelet = 2;
+
   // Left/right boundary of a lanelet
   std::vector<lanelet::LineString3d> la_linestrings(n_linestrings_per_lanelet);
+
   // Points per linestring
   std::vector<lanelet::Point3d> ls_points = {};
 
@@ -640,6 +616,7 @@ void MissionPlannerNode::ConvertInput2LaneletFormat(
     map_original_to_new[msg.segments[idx_segment].id] = idx_segment;
 
     // Get successor/neighbor lanelet information
+
     // Write lanelet neighbors
     for (std::size_t i = 0; i < msg.segments[idx_segment].neighboring_segment_id.size(); i++) {
       out_lanelet_connections[idx_segment].neighbor_lanelet_ids.push_back(
@@ -710,7 +687,7 @@ lanelet::BasicPoint2d MissionPlannerNode::GetPointOnLane(
       "probably empty.");
   }
 
-  // Return point p
+  // Return point
   return return_point;
 }
 

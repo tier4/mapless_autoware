@@ -25,7 +25,6 @@
 #include "autoware_mapless_planning_msgs/msg/local_map.hpp"
 #include "autoware_mapless_planning_msgs/msg/mission.hpp"
 #include "autoware_mapless_planning_msgs/msg/mission_lanes_stamped.hpp"
-#include "autoware_mapless_planning_msgs/msg/visualization_distance.hpp"
 #include "geometry_msgs/msg/point.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
@@ -49,7 +48,7 @@ const Direction right = 2;
 const Direction left_most = 3;
 const Direction right_most = 4;
 
-// Define Lanes
+// Lanes data type
 struct Lanes
 {
   std::vector<int> ego;
@@ -63,6 +62,12 @@ struct Lanes
 class MissionPlannerNode : public rclcpp::Node
 {
 public:
+  /**
+   * @brief Constructor for the MissionPlannerNode class.
+   *
+   * Initializes the publisher and subscriber with appropriate topics and QoS
+   * settings.
+   */
   explicit MissionPlannerNode(const rclcpp::NodeOptions & options);
 
   /**
@@ -78,7 +83,7 @@ public:
     (std::vector<LaneletConnection>).
     * @return bool (is on goal lane or not).
     */
-  bool IsOnGoalLane_(
+  bool IsOnGoalLane(
     const int ego_lanelet_index, const lanelet::BasicPoint2d & goal_point,
     const std::vector<lanelet::Lanelet> & converted_lanelets,
     const std::vector<LaneletConnection> & lanelet_connections);
@@ -86,38 +91,38 @@ public:
   /**
    * @brief Function which checks if the goal point has a negative x value und
    * must be therefore reset. If the x value is negative the goal point is reset
-   * with GetPointOnLane_().
+   * with GetPointOnLane().
    *
    * @param converted_lanelets The lanelets from the road model
     (std::vector<lanelet::Lanelet>).
    * @param lanelet_connections The lanelet connections from the road model
     (std::vector<LaneletConnection>).
    */
-  void CheckIfGoalPointShouldBeReset_(
+  void CheckIfGoalPointShouldBeReset(
     const lanelet::Lanelets & converted_lanelets,
     const std::vector<LaneletConnection> & lanelet_connections);
 
   /**
-   * @brief Function for calculating lanes
+   * @brief Function for calculating lanes.
    *
    * @param converted_lanelets The lanelets given from the road model.
    * @param lanelet_connections The lanelet connections given from the road
    * model.
-   * @return Lanes: ego lane, all left lanes, all right lanes
+   * @return Lanes: ego lane, all left lanes, all right lanes.
    */
-  Lanes CalculateLanes_(
+  Lanes CalculateLanes(
     const std::vector<lanelet::Lanelet> & converted_lanelets,
     std::vector<LaneletConnection> & lanelet_connections);
 
   /**
-   * @brief Getter for goal_point_
+   * @brief Getter for goal_point_.
    *
-   * @return lanelet::BasicPoint2d
+   * @return lanelet::BasicPoint2d.
    */
   lanelet::BasicPoint2d goal_point();
 
   /**
-   * @brief Setter for goal_point_
+   * @brief Setter for goal_point_.
    *
    * @param goal_point The new value for the goal_point_.
    */
@@ -128,14 +133,14 @@ public:
    *
    * @param msg The autoware_mapless_planning_msgs::msg::Mission message.
    */
-  void CallbackMissionMessages_(const autoware_mapless_planning_msgs::msg::Mission & msg);
+  void CallbackMissionMessages(const autoware_mapless_planning_msgs::msg::Mission & msg);
 
   /**
    * @brief The callback for the LocalMap messages.
    *
    * @param msg The autoware_mapless_planning_msgs::msg::LocalMap message.
    */
-  void CallbackLocalMapMessages_(const autoware_mapless_planning_msgs::msg::LocalMap & msg);
+  void CallbackLocalMapMessages(const autoware_mapless_planning_msgs::msg::LocalMap & msg);
 
   /**
    * @brief Convert RoadSegments into lanelets.
@@ -159,7 +164,7 @@ public:
    * the vehicle (in x direction using a projection).
    * @param converted_lanelets The lanelets (std::vector<lanelet::Lanelet>) from
    * the road model.
-   * @return lanelet::BasicPoint2d
+   * @return lanelet::BasicPoint2d.
    */
   lanelet::BasicPoint2d GetPointOnLane(
     const std::vector<int> & lane, const float x_distance,
@@ -171,7 +176,7 @@ public:
    *
    * @param linestring The LineString.
    * @param point The point.
-   * @return double
+   * @return double.
    */
   double CalculateDistanceBetweenPointAndLineString(
     const lanelet::ConstLineString2d & linestring, const lanelet::BasicPoint2d & point);
@@ -186,13 +191,12 @@ public:
     const autoware_mapless_planning_msgs::msg::RoadSegments & msg,
     const autoware_mapless_planning_msgs::msg::DrivingCorridor & driving_corridor);
 
-private:
   /**
    * @brief Callback for the odometry messages.
    *
    * @param msg The odometry message (nav_msgs::msg::Odometry).
    */
-  void CallbackOdometryMessages_(const nav_msgs::msg::Odometry & msg);
+  void CallbackOdometryMessages(const nav_msgs::msg::Odometry & msg);
 
   /**
    * @brief Initiate a lane change.
@@ -201,8 +205,9 @@ private:
    * right).
    * @param neighboring_lane The neighboring lane.
    */
-  void InitiateLaneChange_(const Direction direction, const std::vector<int> & neighboring_lane);
+  void InitiateLaneChange(const Direction direction, const std::vector<int> & neighboring_lane);
 
+private:
   //  Declare ROS2 publisher and subscriber
   rclcpp::Subscription<autoware_mapless_planning_msgs::msg::LocalMap>::SharedPtr mapSubscriber_;
 
@@ -230,14 +235,13 @@ private:
   bool pose_prev_init_ = false;
   bool b_input_odom_frame_error_ = false;
   bool received_motion_update_once_ = false;
+  bool lane_change_trigger_success_ = true;
   Direction target_lane_ = stay;
   Direction mission_ = stay;
+  Direction lane_change_direction_ = stay;
   int retry_attempts_ = 0;
   int recenter_counter_ = 0;
-  bool lane_change_trigger_success_ = true;
-  Direction lane_change_direction_ = stay;
   float deadline_target_lane_ = 1000;
-
   lanelet::BasicPoint2d goal_point_;
   std::vector<int> ego_lane_;
   std::vector<int> lane_left_;
@@ -248,8 +252,8 @@ private:
   float distance_to_centerline_threshold_;
   float projection_distance_on_goallane_;
   int retrigger_attempts_max_;
-  std::string local_map_frame_;
   int recenter_period_;
+  std::string local_map_frame_;
 
   // Unique ID for each marker
   ID centerline_marker_id_;
