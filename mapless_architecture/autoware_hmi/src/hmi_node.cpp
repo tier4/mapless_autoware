@@ -14,19 +14,14 @@
 
 #include "autoware/hmi/hmi_node.hpp"
 
-#include "rclcpp/rclcpp.hpp"
-
-#include "autoware_mapless_planning_msgs/msg/mission.hpp"
-
 namespace autoware::mapless_architecture
 {
 using std::placeholders::_1;
 
 HMINode::HMINode(const rclcpp::NodeOptions & options) : Node("hmi_node", options)
 {
-  // Set quality of service to best effort (if transmission fails, do not try to
-  // resend but rather use new sensor data)
-  // the history_depth is set to 1 (message queue size)
+  // Set quality of service to best effort (if transmission fails, do not try to resend but rather
+  // use new sensor data), the history_depth is set to 1 (message queue size)
   auto qos = rclcpp::QoS(1);
   qos.best_effort();
 
@@ -68,7 +63,7 @@ rcl_interfaces::msg::SetParametersResult HMINode::ParamCallback_(
   return result;
 }
 
-void HMINode::PublishMission_(std::string mission)
+void HMINode::PublishMission_(const std::string & mission)
 {
   autoware_mapless_planning_msgs::msg::Mission missionMessage;
   if (mission == "LANE_KEEP") {
