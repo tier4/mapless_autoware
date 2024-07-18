@@ -38,16 +38,22 @@ namespace autoware::mapless_architecture
 class MissionLaneConverterNode : public rclcpp::Node
 {
 public:
+  /**
+   * @brief Constructor for the MissionLaneConverterNode class.
+   *
+   * Initializes the publisher and subscriber with appropriate topics and QoS
+   * settings.
+   */
   explicit MissionLaneConverterNode(const rclcpp::NodeOptions & options);
 
   /**
    * @brief Converts the mission message into a reference trajectory which is
    * forwarded to a local trajectory planner for refinement.
    *
-   * @param msg The mission lanes
+   * @param msg The mission lanes.
    * @return std::tuple<autoware_planning_msgs::msg::Trajectory,
    * visualization_msgs::msg::Marker, autoware_planning_msgs::msg::Path,
-   * visualization_msgs::msg::Marker>
+   * visualization_msgs::msg::Marker>.
    */
   std::tuple<
     autoware_planning_msgs::msg::Trajectory, visualization_msgs::msg::Marker,
@@ -58,17 +64,17 @@ private:
   /**
    * @brief Computes a trajectory based on the mission planner input.
    *
-   * @param msg Mission lanes from the mission planner module
+   * @param msg Mission lanes from the mission planner module.
    */
   void MissionLanesCallback_(const autoware_mapless_planning_msgs::msg::MissionLanesStamped & msg);
 
   /**
    * @brief Adds a trajectory point to the pre-allocated ROS message.
    *
-   * @param trj_msg The pre-allocated trajectory message
-   * @param x The x position of the point to be added
-   * @param y The y position of the point to be added
-   * @param v_x The longitudinal velocity of the point to be added
+   * @param trj_msg The pre-allocated trajectory message.
+   * @param x The x position of the point to be added.
+   * @param y The y position of the point to be added.
+   * @param v_x The longitudinal velocity of the point to be added.
    */
   void AddTrajectoryPoint_(
     autoware_planning_msgs::msg::Trajectory & trj_msg, const double x, const double y,
@@ -77,19 +83,19 @@ private:
   /**
    * @brief Adds a visualization point to the pre-allocated ROS message.
    *
-   * @param trj_vis The pre-allocated visualization message
-   * @param x The x position of the marker to be added
-   * @param y The y position of the marker to be added
-   * @param v_x The id of the marker to be added
+   * @param trj_vis The pre-allocated visualization message.
+   * @param x The x position of the marker to be added.
+   * @param y The y position of the marker to be added.
+   * @param v_x The id of the marker to be added.
    */
   void AddPointVisualizationMarker_(
     visualization_msgs::msg::Marker & trj_vis, const double x, const double y, const int id_marker);
 
   /**
    * @brief Computes and adds a heading information to the pre-allocated input
-   * trajectory based on the x/y positions given in the input argument
+   * trajectory based on the x/y positions given in the input argument.
    *
-   * @param trj_msg
+   * @param trj_msg.
    */
   void AddHeadingToTrajectory_(autoware_planning_msgs::msg::Trajectory & trj_msg);
 
@@ -99,7 +105,6 @@ private:
    * once. This can be considered to be a workaround during startup of the local
    * environment generation which starts in a certain distance in front of the
    * vehicle.
-   *
    */
   void TimedStartupTrajectoryCallback();
 
@@ -143,7 +148,7 @@ private:
   /**
    * @brief Callback to store the most recent odometry update.
    *
-   * @param msg Odometry input message
+   * @param msg Odometry input message.
    */
   void CallbackOdometryMessages_(const nav_msgs::msg::Odometry & msg);
 
@@ -151,18 +156,18 @@ private:
    * @brief Template to transform both Autoware::Path and Autoware::Trajectory into a global map
    * frame.
    *
-   * @tparam T autoware_planning_msgs::msg::Path, autoware_planning_msgs::msg::Trajectory
-   * @param input Input ROS message which content must be transformed into the global map frame
-   * @return T Same as input message with the content being valid in the global map
+   * @tparam T autoware_planning_msgs::msg::Path, autoware_planning_msgs::msg::Trajectory.
+   * @param input Input ROS message which content must be transformed into the global map frame.
+   * @return T Same as input message with the content being valid in the global map.
    */
   template <typename T>
   T TransformToGlobalFrame(const T & input);
 
   /**
-   * @brief Visualization helper for the global trajectory
+   * @brief Visualization helper for the global trajectory.
    *
-   * @param trj_msg Trajectory in global map frame
-   * @return visualization_msgs::msg::Marker
+   * @param trj_msg Trajectory in global map frame.
+   * @return visualization_msgs::msg::Marker.
    */
   visualization_msgs::msg::Marker GetGlobalTrjVisualization_(
     const autoware_planning_msgs::msg::Trajectory & trj_msg);
