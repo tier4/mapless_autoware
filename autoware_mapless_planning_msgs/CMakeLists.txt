@@ -1,21 +1,23 @@
 cmake_minimum_required(VERSION 3.5)
-project(__PACKAGE_NAME__)
-
-if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 14)
-  set(CMAKE_CXX_STANDARD_REQUIRED ON)
-  set(CMAKE_CXX_EXTENSIONS OFF)
-endif()
-
-if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wall -Wextra -Wpedantic)
-endif()
+project(autoware_mapless_planning_msgs)
 
 find_package(ament_cmake_auto REQUIRED)
 ament_auto_find_build_dependencies()
 
 rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/DrivingCorridor.msg"
+  "msg/MissionLanesStamped.msg"
+  "msg/Mission.msg"
+  "msg/VisualizationDistance.msg"
+  "msg/Segment.msg"
+  "msg/RoadSegments.msg"
+  "msg/Linestring.msg"
+  "msg/LocalMap.msg"
   DEPENDENCIES
+    geometry_msgs
+    std_msgs
+    nav_msgs
+  ADD_LINTER_TESTS
 )
 
 if(BUILD_TESTING)
