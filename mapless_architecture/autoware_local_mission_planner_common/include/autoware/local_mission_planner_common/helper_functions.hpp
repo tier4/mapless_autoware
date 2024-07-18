@@ -26,7 +26,6 @@
 #include "autoware_mapless_planning_msgs/msg/mission.hpp"
 #include "autoware_mapless_planning_msgs/msg/mission_lanes_stamped.hpp"
 #include "autoware_mapless_planning_msgs/msg/road_segments.hpp"
-#include "autoware_mapless_planning_msgs/msg/visualization_distance.hpp"
 #include "geometry_msgs/msg/point.hpp"
 #include "geometry_msgs/msg/pose.hpp"
 #include "visualization_msgs/msg/marker.hpp"
@@ -80,7 +79,7 @@ private:
 };
 
 /**
- * Represent a 2D pose (pose_prev) in a new origin / coordinate system, which
+ * @brief Represent a 2D pose (pose_prev) in a new origin / coordinate system, which
  * is given in relation to the previous coordinate system / origin
  * (cosy_rel).
  *
@@ -89,10 +88,10 @@ private:
  * absolute pose of the old/current cosy as "cosy_rel".
  *
  * @param cosy_rel Translation and rotation between the current/old cosy and
- * a new/go-to cosy
- * @param pose_prev Coordinates and heading of a pose in the current/old cosy
+ * a new/go-to cosy.
+ * @param pose_prev Coordinates and heading of a pose in the current/old cosy.
  * @return Pose coordinates and heading of pose_prev in the new cosy
- * (defined by the shift cosy_rel between previous and current cosy)
+ * (defined by the shift cosy_rel between previous and current cosy).
  */
 Pose2D TransformToNewCosy2D(const Pose2D cosy_rel, const Pose2D pose_prev);
 
@@ -111,7 +110,7 @@ double GetYawFromQuaternion(const double x, const double y, const double z, cons
  * @brief Normalize the psi value.
  *
  * @param psi The psi value.
- * @return double
+ * @return double.
  */
 double NormalizePsi(const double psi);
 
@@ -124,13 +123,10 @@ double NormalizePsi(const double psi);
 std::vector<double> GetPsiForPoints(const std::vector<geometry_msgs::msg::Point> & points);
 
 /**
- * @brief Holds
- * the origin lanelet Id,
- * the predecessor lanelet Ids,
- * the successor lanelet Ids,
- * the neighboring lanelet Ids
- * the goal information
+ * @brief LaneletConnection
  *
+ * Holds the origin lanelet Id, the predecessor lanelet Ids, the successor lanelet Ids, the
+ * neighboring lanelet Ids and the goal information.
  */
 struct LaneletConnection
 {
@@ -143,7 +139,6 @@ struct LaneletConnection
 
 /**
  * @brief The adjacent lane type.
- *
  */
 enum AdjacentLaneType { kSuccessors = 0, kPredecessors = 1 };
 
@@ -152,10 +147,10 @@ enum AdjacentLaneType { kSuccessors = 0, kPredecessors = 1 };
           This function wraps GetAllLaneletSequences()
 
  * @param lanelet_connections   Relation between individual lanelets
- *                              (successors/predecessors/neighbors)
+ *                              (successors/predecessors/neighbors).
  * @param id_initial_lanelet    ID of lanelet from where neighbor search is
-                                started
- * @return Collection of sequences of all successor lanelets
+                                started.
+ * @return Collection of sequences of all successor lanelets.
  */
 
 std::vector<std::vector<int>> GetAllSuccessorSequences(
@@ -166,12 +161,10 @@ std::vector<std::vector<int>> GetAllSuccessorSequences(
         lanelets to the initial lanelet.
 
 * @param lanelet_connections   Relation between individual lanelets
-*                              (successors/predecessors/neighbors)
-* @param id_initial_lanelet    ID of lanelet from where neighbor search is
-                              started
-* @param adjacent_lane_type    Specifies whether predecessors or successors
-should be targeted (e.g. lanelet_tools::AdjacentLaneType::kPredecessors)
-*
+*                              (successors/predecessors/neighbors).
+* @param id_initial_lanelet    ID of lanelet from where neighbor search is started.
+* @param adjacent_lane_type    Specifies whether predecessors or successors should be targeted (e.g.
+lanelet_tools::AdjacentLaneType::kPredecessors).
 * @return Collection of sequences of all adjacent lanelets
 */
 std::vector<std::vector<int>> GetAllLaneletSequences(
@@ -179,18 +172,17 @@ std::vector<std::vector<int>> GetAllLaneletSequences(
   const AdjacentLaneType adjacent_lane_type);
 
 /**
-* @brief Find relevant adjacent (successors or predecessors) lanelets (currently relevant means
-leading towards goal) among a set of provided adjacent lanelets (ids_adjacent_lanelets)
-*
-* @param lanelet_connections   Relation between individual lanelets
-                              (successors/neighbors)
-* @param ids_adjacent_lanelets IDs of all available adjacent lanelets
-                              (either successors or predecessors)
-* @param do_include_navigation_info  Whether to use navigation info to
-*            determine relevant successors (true) or not (false); if navigation info is not used,
-the ID of the first direct successors will be returned
-* @return    ID of relevant successor lanelet
-*/
+ * @brief Find relevant adjacent (successors or predecessors) lanelets (currently relevant means
+ * leading towards goal) among a set of provided adjacent lanelets (ids_adjacent_lanelets).
+ *
+ * @param lanelet_connections   Relation between individual lanelets (successors/neighbors).
+ * @param ids_adjacent_lanelets IDs of all available adjacent lanelets (either successors or
+ * predecessors).
+ * @param do_include_navigation_info  Whether to use navigation info to determine relevant
+ * successors (true) or not (false); if navigation info is not used, the ID of the first direct
+ * successors will be returned.
+ * @return ID of relevant successor lanelet.
+ */
 std::vector<int> GetRelevantAdjacentLanelets(
   const std::vector<LaneletConnection> & lanelet_connections,
   const std::vector<int> ids_adjacent_lanelets, const bool do_include_navigation_info);
@@ -198,18 +190,17 @@ std::vector<int> GetRelevantAdjacentLanelets(
 /**
  * @brief Get a complete lanelet ID sequence starting from an initial lanelet.
  *
- * @param lanelet_id_sequence_current  Current lanelet ID sequence (of
- * previous iteration); this is the start for the search in the current iteration
- * @param lanelets_already_visited      List of already visited lanelet IDs
+ * @param lanelet_id_sequence_current  Current lanelet ID sequence (of previous iteration); this is
+ * the start for the search in the current iteration.
+ * @param lanelets_already_visited      List of already visited lanelet IDs.
  * @param ids_relevant_lanelets         IDs of the relevant adjacent (successor or predecessor)
- * lanelets
- * @param id_initial_lanelet            ID of lanelet from which search was
- *                                      started initially
+ * lanelets.
+ * @param id_initial_lanelet            ID of lanelet from which search was started initially.
  * @return  - Vector containing IDs of a completed lanelet sequence; is empty
  *            when the sequence is not completed yet (i.e. there are still some unvisited adjacent
- * lanelets left)
+ *            lanelets left).
  *          - Flag to indicate whether outer for loop should be exited; this is necessary when no
- * unvisited lanelets are left from the initial lanelet
+ *            unvisited lanelets are left from the initial lanelet.
  */
 std::tuple<std::vector<int>, bool> GetCompletedLaneletSequence(
   std::vector<int> & lanelet_id_sequence_current, std::vector<int> & lanelets_already_visited,
@@ -217,7 +208,6 @@ std::tuple<std::vector<int>, bool> GetCompletedLaneletSequence(
 
 /**
  * @brief The vehicle side (left or right).
- *
  */
 enum VehicleSide { kLeft = 0, kRight = 1 };
 
@@ -225,13 +215,13 @@ enum VehicleSide { kLeft = 0, kRight = 1 };
  * @brief Get all neighboring lanelet IDs on one side.
  *
  * @param lanelet_connections   Relation between individual lanelets
- *                              (successors/neighbors)
+ *                              (successors/neighbors).
  * @param id_initial_lanelet    ID of lanelet from where neighbor search is
-                                started
+                                started.
  * @param side                  Side of initial lanelet where neighboring
-                                lanelet ID should get searched
+                                lanelet ID should get searched.
  * @return IDs of all neighboring lanelets (returns -1 if no neighbor
- available)
+ available).
  */
 std::vector<int> GetAllNeighboringLaneletIDs(
   const std::vector<LaneletConnection> & lanelet_connections, const int id_initial_lanelet,
@@ -241,22 +231,21 @@ std::vector<int> GetAllNeighboringLaneletIDs(
  * @brief Get the ID of a specified neighboring lanelet.
  *
  * @param lanelet_connections   Relation between individual lanelets
- *                              (successors/neighbors)
+ *                              (successors/neighbors).
  * @param id_initial_lanelet    ID of lanelet from where neighbor search is
-                                started
+                                started.
  * @param side                  Side of initial lanelet where neighboring
-                                lanelet ID should get searched
+                                lanelet ID should get searched.
  * @param do_include_navigation_info  Whether to use navigation info to
  *                                    determine relevant neighbors (true) or
- *                                    not (false)
+ *                                    not (false).
  * @param recursiveness (defaults to 1)
- *    - level of recursiveness for neighbor search
+ *    - level of recursiveness for neighbor search.
  *    - recursivenes=-1 means that the most outside lanes are requested (returns initial lanelet ID
- if no neighbors are available -> initial lanelet is the most outside lane)
+ *      if no neighbors are available -> initial lanelet is the most outside lane).
  *    - recursiveness>=0 means that the direct neighbors (1), neighbors of neighbors (2), ..., are
- searched (returns -1 if no lanelet is available at the specified level of recursiveness)
- *
- * @return ID of neighboring lanelet (returns -1 if no neighbor available)
+ *      searched (returns -1 if no lanelet is available at the specified level of recursiveness).
+ * @return ID of neighboring lanelet (returns -1 if no neighbor available).
  */
 int GetNeighboringLaneletID(
   const std::vector<LaneletConnection> & lanelet_connections, const int id_initial_lanelet,
@@ -264,57 +253,57 @@ int GetNeighboringLaneletID(
 
 /**
  * @brief Get all sequences of predecessor lanelets to the initial lanelet.
-          This function wraps GetAllLaneletSequences()
+          This function wraps GetAllLaneletSequences().
 
  * @param lanelet_connections   Relation between individual lanelets
- *                              (successors/predecessors/neighbors)
+ *                              (successors/predecessors/neighbors).
  * @param id_initial_lanelet    ID of lanelet from where neighbor search is
-                                started
- * @return Collection of sequences of all predecessor lanelets
+                                started.
+ * @return Collection of sequences of all predecessor lanelets.
  */
 std::vector<std::vector<int>> GetAllPredecessorSequences(
   const std::vector<LaneletConnection> & lanelet_connections, const int id_initial_lanelet);
 
 /**
- * @brief Finds the ID of lanelet where a given position is located in
+ * @brief Finds the ID of lanelet where a given position is located in.
  *
- * @param lanelets  Collection of lanelets to search
- * @param position  Position of which the corresponding lanelet ID is wanted
- * @return          lanelet ID (returns -1 if no match)
+ * @param lanelets  Collection of lanelets to search.
+ * @param position  Position of which the corresponding lanelet ID is wanted.
+ * @return          lanelet ID (returns -1 if no match).
  */
 int FindOccupiedLaneletID(
   const std::vector<lanelet::Lanelet> & lanelets, const lanelet::BasicPoint2d & position);
 
 /**
- * @brief Finds the ID of the ego vehicle occupied lanelet
+ * @brief Finds the ID of the ego vehicle occupied lanelet.
  *
- * @param lanelets  Collection of lanelets to search
- * @return          lanelet ID (returns -1 if no match)
+ * @param lanelets  Collection of lanelets to search.
+ * @return          lanelet ID (returns -1 if no match).
  */
 int FindEgoOccupiedLaneletID(const std::vector<lanelet::Lanelet> & lanelets);
 
 /**
- * @brief Recenter a point in a lanelet to its closest point on the centerline
+ * @brief Recenter a point in a lanelet to its closest point on the centerline.
  *
- * @param goal_point The input point which should be re-centered
- * @param road_model The road model which contains the point to be re-centered
+ * @param goal_point The input point which should be re-centered.
+ * @param road_model The road model which contains the point to be re-centered.
  * @return lanelet::BasicPoint2d The re-centered point (which lies on the
- * centerline of its lanelet)
+ * centerline of its lanelet).
  */
 lanelet::BasicPoint2d RecenterGoalPoint(
   const lanelet::BasicPoint2d & goal_point, const std::vector<lanelet::Lanelet> & road_model);
 
 /**
-  * @brief Function for creating a marker array.
-  * This functions creates a visualization_msgs::msg::MarkerArray from the
-  given input.
-  *
-  * @param centerline The centerline which is a LineString.
-  * @param left The left boundary which is a LineString.
-  * @param right The right boundary which is a LineString.
-  * @param msg The LaneletsStamped message.
-  * @return MarkerArray (visualization_msgs::msg::MarkerArray).
-  */
+ * @brief Function for creating a marker array.
+ *
+ * This functions creates a visualization_msgs::msg::MarkerArray from the given input.
+ *
+ * @param centerline The centerline which is a LineString.
+ * @param left The left boundary which is a LineString.
+ * @param right The right boundary which is a LineString.
+ * @param msg The LaneletsStamped message.
+ * @return MarkerArray (visualization_msgs::msg::MarkerArray).
+ */
 visualization_msgs::msg::MarkerArray CreateMarkerArray(
   const std::vector<lanelet::ConstLineString3d> & centerline,
   const std::vector<lanelet::ConstLineString3d> & left,
@@ -324,10 +313,9 @@ visualization_msgs::msg::MarkerArray CreateMarkerArray(
 /**
  * @brief Create a DrivingCorridor object.
  *
- * @param lane The lane which is a std::vector<int> containing all the indices
- * of the lane.
+ * @param lane The lane which is a std::vector<int> containing all the indices of the lane.
  * @param converted_lanelets The lanelets (std::vector<lanelet::Lanelet>).
- * @return autoware_mapless_planning_msgs::msg::DrivingCorridor
+ * @return autoware_mapless_planning_msgs::msg::DrivingCorridor.
  */
 autoware_mapless_planning_msgs::msg::DrivingCorridor CreateDrivingCorridor(
   const std::vector<int> & lane, const std::vector<lanelet::Lanelet> & converted_lanelets);
@@ -335,9 +323,8 @@ autoware_mapless_planning_msgs::msg::DrivingCorridor CreateDrivingCorridor(
 /**
  * @brief Function for creating a lanelet::LineString2d.
  *
- * @param points The considered points
- * (std::vector<geometry_msgs::msg::Point>).
- * @return lanelet::LineString2d
+ * @param points The considered points (std::vector<geometry_msgs::msg::Point>).
+ * @return lanelet::LineString2d.
  */
 lanelet::LineString2d CreateLineString(const std::vector<geometry_msgs::msg::Point> & points);
 
@@ -356,10 +343,8 @@ std::vector<int> GetAllNeighborsOfLane(
 /**
  * @brief Add the predecessor lanelet to a lane.
  *
- * @param lane_idx The considered lane. The predecessor lanelet is added to
- * the front of the lane.
+ * @param lane_idx The considered lane. The predecessor lanelet is added to the front of the lane.
  * @param lanelet_connections The lanelet connections.
- *
  */
 void InsertPredecessorLanelet(
   std::vector<int> & lane, const std::vector<LaneletConnection> & lanelet_connections);
