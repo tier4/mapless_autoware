@@ -33,6 +33,7 @@ class HMINode : public rclcpp::Node
 public:
   /**
    * @brief Constructor for the HMINode class.
+   *
    * Initializes the publisher and subscriber with appropriate topics and QoS
    * settings.
    */
@@ -41,8 +42,10 @@ public:
 private:
   /**
    * @brief Callback function for parameter changes.
+   *
    * This callback function is triggered whenever a ROS 2 parameter is changed.
-   * @param parameters The received parameter changes.
+   *
+   * @param parameters The received parameter.
    */
   rcl_interfaces::msg::SetParametersResult ParamCallback_(
     const std::vector<rclcpp::Parameter> & parameters);
@@ -52,7 +55,7 @@ private:
    *
    * @param mission The mission that should be published.
    */
-  void PublishMission_(std::string mission);
+  void PublishMission_(const std::string & mission);
 
   // Declare ROS2 publisher and subscriber
 

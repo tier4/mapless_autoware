@@ -15,9 +15,6 @@
 #include "autoware/local_mission_planner_common/helper_functions.hpp"
 
 #include "lanelet2_core/geometry/Lanelet.h"
-#include "rclcpp/rclcpp.hpp"
-
-#include "autoware_mapless_planning_msgs/msg/road_segments.hpp"
 
 namespace autoware::mapless_architecture
 {
@@ -462,8 +459,8 @@ visualization_msgs::msg::MarkerArray CreateMarkerArray(
   for (size_t i = 0; i < left.size(); ++i) {
     visualization_msgs::msg::Marker marker;  // Create a new marker in each iteration
 
-    marker.header.frame_id = msg.header.frame_id;  // Adjust frame_id as needed
-    marker.header.stamp = msg.header.stamp;        // rclcpp::Node::now();
+    marker.header.frame_id = msg.header.frame_id;
+    marker.header.stamp = msg.header.stamp;
     marker.ns = "linestring";
     marker.id = i + 1000;
     marker.type = visualization_msgs::msg::Marker::POINTS;
@@ -490,8 +487,8 @@ visualization_msgs::msg::MarkerArray CreateMarkerArray(
   for (size_t i = 0; i < right.size(); ++i) {
     visualization_msgs::msg::Marker marker;  // Create a new marker in each iteration
 
-    marker.header.frame_id = msg.header.frame_id;  // Adjust frame_id as needed
-    marker.header.stamp = msg.header.stamp;        // rclcpp::Node::now();
+    marker.header.frame_id = msg.header.frame_id;
+    marker.header.stamp = msg.header.stamp;
     marker.ns = "linestring";
     marker.id = i + 2000;
     marker.type = visualization_msgs::msg::Marker::POINTS;

@@ -14,18 +14,7 @@
 
 #include "autoware/mission_lane_converter/mission_lane_converter_node.hpp"
 
-#include "autoware/local_mission_planner_common/helper_functions.hpp"
-#include "rclcpp/rclcpp.hpp"
-
-#include "autoware_planning_msgs/msg/path.hpp"
-#include "autoware_planning_msgs/msg/path_point.hpp"
-#include "autoware_planning_msgs/msg/trajectory.hpp"
-#include "autoware_planning_msgs/msg/trajectory_point.hpp"
-#include "visualization_msgs/msg/marker.hpp"
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
-
-#include <chrono>
-#include <functional>
 
 namespace autoware::mapless_architecture
 {
@@ -34,15 +23,15 @@ using std::placeholders::_1;
 MissionLaneConverterNode::MissionLaneConverterNode(const rclcpp::NodeOptions & options)
 : Node("mission_lane_converter_node", options)
 {
-  // Set quality of service to best effort (if transmission fails, do not try to
-  // resend but rather use new sensor data)
-  // the history_depth is set to 1 (message queue size)
+  // Set quality of service to best effort (if transmission fails, do not try to resend but rather
+  // use new sensor data), the history_depth is set to 1 (message queue size)
   auto qos_best_effort = rclcpp::QoS(1);
   qos_best_effort.best_effort();
 
   auto qos_reliability = rclcpp::QoS(1);
   qos_reliability.reliability();
 
+  // Initialize subscriber
   odom_subscriber_ = this->create_subscription<nav_msgs::msg::Odometry>(
     "mission_lane_converter/input/odometry", qos_best_effort,
     std::bind(&MissionLaneConverterNode::CallbackOdometryMessages_, this, _1));
@@ -64,7 +53,6 @@ MissionLaneConverterNode::MissionLaneConverterNode(const rclcpp::NodeOptions & o
   publisher_ = this->create_publisher<autoware_planning_msgs::msg::Trajectory>(
     "mission_lane_converter/output/global_trajectory", qos_reliability);
 
-  // Path publisher
   path_publisher_ = create_publisher<autoware_planning_msgs::msg::Path>(
     "mission_lane_converter/output/path", qos_reliability);
 
@@ -87,7 +75,7 @@ MissionLaneConverterNode::MissionLaneConverterNode(const rclcpp::NodeOptions & o
   vis_odometry_publisher_global_ = this->create_publisher<visualization_msgs::msg::Marker>(
     "mission_lane_converter/output/vis_global_odometry", qos_best_effort);
 
-  // ros parameters (will be overwritten by external param file if exists)
+  // ROS parameters (will be overwritten by external param file if exists)
   target_speed_ = declare_parameter<float>("target_speed", 3.0);
   RCLCPP_INFO(this->get_logger(), "Target speed set to: %.2f", target_speed_);
 }
@@ -122,7 +110,7 @@ void MissionLaneConverterNode::TimedStartupTrajectoryCallback()
 void MissionLaneConverterNode::MissionLanesCallback_(
   const autoware_mapless_planning_msgs::msg::MissionLanesStamped & msg_mission)
 {
-  // FIXME: workaround to get the vehicle driving in autonomous mode until the
+  // FIXME: Workaround to get the vehicle driving in autonomous mode until the
   // environment model is available
   if (msg_mission.ego_lane.centerline.size() == 0) {
     // Do not continue to publish empty trajectory
@@ -135,21 +123,25 @@ void MissionLaneConverterNode::MissionLanesCallback_(
     mission_lanes_available_once_ = true;
   }
 
+  // Convert mission lanes to trajectory
   std::tuple<
     autoware_planning_msgs::msg::Trajectory, visualization_msgs::msg::Marker,
     autoware_planning_msgs::msg::Path, visualization_msgs::msg::MarkerArray>
     mission_to_trj = ConvertMissionToTrajectory(msg_mission);
 
+  // Extract the tuple
   autoware_planning_msgs::msg::Trajectory trj_msg = std::get<0>(mission_to_trj);
   visualization_msgs::msg::Marker trj_vis = std::get<1>(mission_to_trj);
   autoware_planning_msgs::msg::Path path_msg = std::get<2>(mission_to_trj);
   visualization_msgs::msg::MarkerArray path_area = std::get<3>(mission_to_trj);
 
+  // Transform trajectory to global frame
   autoware_planning_msgs::msg::Trajectory trj_msg_global =
     TransformToGlobalFrame<autoware_planning_msgs::msg::Trajectory>(trj_msg);
   autoware_planning_msgs::msg::Path path_msg_global =
     TransformToGlobalFrame<autoware_planning_msgs::msg::Path>(path_msg);
 
+  // Publish trajectory to visualization
   visualization_msgs::msg::Marker trj_vis_global = GetGlobalTrjVisualization_(trj_msg_global);
   vis_trajectory_publisher_global_->publish(trj_vis_global);
 
@@ -554,7 +546,7 @@ T MissionLaneConverterNode::TransformToGlobalFrame(const T & msg_input)
 
     // Convert all the input points to the global map frame
     for (size_t i = 0; i < msg_input.points.size(); i++) {
-      // convert input pose
+      // Convert input pose
       const double psi_point = GetYawFromQuaternion(
         msg_input.points[i].pose.orientation.x, msg_input.points[i].pose.orientation.y,
         msg_input.points[i].pose.orientation.z, msg_input.points[i].pose.orientation.w);

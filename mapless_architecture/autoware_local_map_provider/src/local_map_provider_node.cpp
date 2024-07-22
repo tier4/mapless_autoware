@@ -14,8 +14,6 @@
 
 #include "autoware/local_map_provider/local_map_provider_node.hpp"
 
-#include "rclcpp/rclcpp.hpp"
-
 namespace autoware::mapless_architecture
 {
 using std::placeholders::_1;
@@ -23,9 +21,8 @@ using std::placeholders::_1;
 LocalMapProviderNode::LocalMapProviderNode(const rclcpp::NodeOptions & options)
 : Node("local_map_provider_node", options)
 {
-  // Set quality of service to best effort (if transmission fails, do not try to
-  // resend but rather use new sensor data)
-  // the history_depth is set to 1 (message queue size)
+  // Set quality of service to best effort (if transmission fails, do not try to resend but rather
+  // use new sensor data), the history_depth is set to 1 (message queue size)
   auto qos = rclcpp::QoS(1);
   qos.best_effort();
 

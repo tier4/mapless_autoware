@@ -15,12 +15,10 @@
 #include "autoware/local_mission_planner/mission_planner_node.hpp"
 #include "autoware/local_mission_planner_common/helper_functions.hpp"
 #include "gtest/gtest.h"
-#include "rclcpp/rclcpp.hpp"
 
 #include "geometry_msgs/msg/pose.hpp"
 
 #include <iostream>
-#include <tuple>
 
 namespace autoware::mapless_architecture
 {
@@ -195,26 +193,26 @@ int TestIsOnGoalLane()
   lanelet::BasicPoint2d point(1.0, 0.0);
 
   // Check if the point is on the lane: should be true
-  EXPECT_EQ(MissionPlanner.IsOnGoalLane_(0, point, lanelets, lanelet_connections), true);
+  EXPECT_EQ(MissionPlanner.IsOnGoalLane(0, point, lanelets, lanelet_connections), true);
 
   // Define a point with x = 100.0 and y = 100.0
   lanelet::BasicPoint2d point2(100.0, 100.0);
 
   // Check if the point is on the lane: should be false
-  EXPECT_EQ(MissionPlanner.IsOnGoalLane_(0, point2, lanelets, lanelet_connections), false);
+  EXPECT_EQ(MissionPlanner.IsOnGoalLane(0, point2, lanelets, lanelet_connections), false);
 
   // Define a point with x = 15.0 and y = 0.0
   lanelet::BasicPoint2d point3(15.0, 0.0);
 
   // Check if the point is on the lane: should be true
-  EXPECT_EQ(MissionPlanner.IsOnGoalLane_(0, point3, lanelets, lanelet_connections), true);
+  EXPECT_EQ(MissionPlanner.IsOnGoalLane(0, point3, lanelets, lanelet_connections), true);
 
   return 0;
 }
 
 autoware_mapless_planning_msgs::msg::RoadSegments GetTestRoadModelForRecenterTests()
 {
-  // local variables
+  // Local variables
   const int n_segments = 2;
 
   // Fill lanelet2 message
@@ -368,7 +366,7 @@ int TestCheckIfGoalPointShouldBeReset()
   MissionPlanner.ConvertInput2LaneletFormat(road_segments, lanelets, lanelet_connections);
 
   // Compute available lanes
-  MissionPlanner.CallbackLocalMapMessages_(local_map);
+  MissionPlanner.CallbackLocalMapMessages(local_map);
 
   // TEST 1: check if goal point is reset in non-default mission
   // Define a goal point with negative x value
@@ -378,10 +376,10 @@ int TestCheckIfGoalPointShouldBeReset()
   // Set a non-default mission to make the goal point reset work
   autoware_mapless_planning_msgs::msg::Mission mission_msg;
   mission_msg.mission_type = autoware_mapless_planning_msgs::msg::Mission::LANE_CHANGE_LEFT;
-  MissionPlanner.CallbackMissionMessages_(mission_msg);
+  MissionPlanner.CallbackMissionMessages(mission_msg);
 
   // Call function which is tested
-  MissionPlanner.CheckIfGoalPointShouldBeReset_(lanelets, lanelet_connections);
+  MissionPlanner.CheckIfGoalPointShouldBeReset(lanelets, lanelet_connections);
 
   // Check if the goal point is reset
   EXPECT_EQ(
@@ -394,10 +392,10 @@ int TestCheckIfGoalPointShouldBeReset()
 
   // Set a non-default mission to make the goal point reset work
   mission_msg.mission_type = autoware_mapless_planning_msgs::msg::Mission::LANE_KEEP;
-  MissionPlanner.CallbackMissionMessages_(mission_msg);
+  MissionPlanner.CallbackMissionMessages(mission_msg);
 
   // Call function which is tested
-  MissionPlanner.CheckIfGoalPointShouldBeReset_(lanelets, lanelet_connections);
+  MissionPlanner.CheckIfGoalPointShouldBeReset(lanelets, lanelet_connections);
 
   // Check if the goal point is reset
   EXPECT_EQ(
@@ -497,7 +495,7 @@ int TestCalculateLanes()
   MissionPlannerNode MissionPlanner = MissionPlannerNode(options);
 
   // Call function which is tested
-  Lanes result = MissionPlanner.CalculateLanes_(lanelets, lanelet_connections);
+  Lanes result = MissionPlanner.CalculateLanes(lanelets, lanelet_connections);
 
   // Get lanes
   std::vector<int> ego_lane_idx = result.ego;
