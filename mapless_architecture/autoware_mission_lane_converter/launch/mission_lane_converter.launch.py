@@ -51,7 +51,7 @@ def generate_launch_description():
                     ),
                     (
                         "mission_lane_converter/input/odometry",
-                        "/awsim/ground_truth/localization/kinematic_state",
+                        "/localization/kinematic_state",
                     ),
                     (
                         "mission_lane_converter/output/trajectory",

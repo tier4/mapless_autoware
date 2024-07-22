@@ -60,7 +60,7 @@ def generate_launch_description():
                     ("mission_planner/input/mission", "hmi_node/output/mission"),
                     (
                         "mission_planner/input/state_estimate",
-                        "/awsim/ground_truth/localization/kinematic_state",
+                        "/localization/kinematic_state",
                     ),
                 ],
                 parameters=[
