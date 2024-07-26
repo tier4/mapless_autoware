@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch>
   <!-- Essential parameters -->
-  <arg name="vehicle_model" default="sample_vehicle" description="vehicle model name"/>
-  <arg name="sensor_model" default="sample_sensor_kit" description="sensor model name"/>
+  <arg name="vehicle_model" default="jpntaxi" description="vehicle model name"/>
+  <arg name="sensor_model" default="aip_xx1" description="sensor model name"/>
   <arg name="pointcloud_container_name" default="pointcloud_container"/>
   <!-- <arg name="data_path" default="$(env HOME)/autoware_data" description="packages data and artifacts directory path"/> -->
 
@@ -11,7 +11,7 @@
 
   <!-- Optional parameters -->
   <!-- Modules to be launched -->
-  <arg name="launch_vehicle" default="false" description="launch vehicle"/>
+  <arg name="launch_vehicle" default="true" description="launch vehicle"/>
   <arg name="launch_system" default="false" description="launch system"/>
   <arg name="launch_map" default="false" description="launch map"/>
   <arg name="launch_sensing" default="false" description="launch sensing"/>
@@ -26,7 +26,7 @@
   <arg name="use_sim_time" default="false" description="use_sim_time"/>
   <!-- Vehicle -->
   <arg name="vehicle_id" default="$(env VEHICLE_ID default)" description="vehicle specific ID"/>
-  <arg name="launch_vehicle_interface" default="false" description="launch vehicle interface"/>
+  <arg name="launch_vehicle_interface" default="true" description="launch vehicle interface"/>
   <!-- Control -->
   <arg name="check_external_emergency_heartbeat" default="false"/>
   <!-- System -->
@@ -36,7 +36,7 @@
   <arg name="system_error_monitor_param_path" default="$(find-pkg-share autoware_launch)/config/system/system_error_monitor/system_error_monitor.param.yaml"/>
   <arg name="diagnostic_graph_aggregator_graph_path" default="$(find-pkg-share autoware_launch)/config/system/diagnostic_graph_aggregator/autoware-main.yaml" description="diagnostic graph config"/>
   <!-- Tools -->
-  <arg name="rviz" default="true" description="launch rviz"/>
+  <arg name="rviz" default="false" description="launch rviz"/>
   <arg name="rviz_config" default="$(find-pkg-share autoware_launch)/rviz/autoware.rviz" description="rviz config"/>
   <arg name="rviz_respawn" default="true"/>
   <!-- Perception -->
@@ -113,6 +113,9 @@
   <!-- Sensing -->
   <group if="$(var launch_sensing)">
     <include file="$(find-pkg-share autoware_launch)/launch/components/tier4_sensing_component.launch.xml"/>
+  </group>
+  <group unless="$(var launch_sensing)">
+    <include file="$(find-pkg-share aip_xx1_launch)/launch/imu.launch.xml"/>
   </group>
 
   <!-- Localization -->
