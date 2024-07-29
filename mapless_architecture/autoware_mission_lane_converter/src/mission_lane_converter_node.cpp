@@ -85,10 +85,14 @@ void MissionLaneConverterNode::TimedStartupTrajectoryCallback()
   if (!mission_lanes_available_once_) {
     // Empty trajectory for controller
     autoware_planning_msgs::msg::Trajectory trj_msg = autoware_planning_msgs::msg::Trajectory();
+    autoware_planning_msgs::msg::Path pth_msg = autoware_planning_msgs::msg::Path();
 
     // Frame id
     trj_msg.header.frame_id = local_map_frame_;
     trj_msg.header.stamp = rclcpp::Node::now();
+
+    pth_msg.header.frame_id = local_map_frame_;
+    pth_msg.header.stamp = rclcpp::Node::now();
 
     for (int idx_point = 0; idx_point < 100; idx_point++) {
       const double x = -5.0 + idx_point * 1.0;
@@ -96,14 +100,25 @@ void MissionLaneConverterNode::TimedStartupTrajectoryCallback()
       const double v_x = target_speed_;
 
       AddTrajectoryPoint_(trj_msg, x, y, v_x);
+      AddPathPoint_(pth_msg, x, y, v_x);
+
+      // Create path bounds
+      geometry_msgs::msg::Point pt_path;
+      pt_path.x = x;
+      pt_path.y = 1.5;
+      pth_msg.left_bound.push_back(pt_path);
+      pt_path.y = -1.5;
+      pth_msg.right_bound.push_back(pt_path);
     }
 
     // Heading in trajectory path will be overwritten
     this->AddHeadingToTrajectory_(trj_msg);
 
     trj_msg = TransformToGlobalFrame(trj_msg);
+    pth_msg = TransformToGlobalFrame(pth_msg);
 
     publisher_->publish(trj_msg);
+    path_publisher_global_->publish(pth_msg);
   }
 }
 
