@@ -1,5 +1,5 @@
 /mapless_architecture:
   autoware_mission_lane_converter:
     ros__parameters:
-      target_speed: 1.0 # [mps] constant target speed of the mission trajectories
+      target_speed: 8.0 # [mps] constant target speed of the mission trajectories
       local_map_frame: map

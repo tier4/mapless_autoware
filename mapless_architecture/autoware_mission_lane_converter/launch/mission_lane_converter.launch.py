@@ -59,7 +59,7 @@ def generate_launch_description():
                     ),
                     (
                         "mission_lane_converter/output/global_trajectory",
-                        "/planning/scenario_planning/trajectory",
+                        "/planning/scenario_planning/global_trajectory",
                     ),
                     (
                         "mission_lane_converter/output/path",
@@ -67,7 +67,7 @@ def generate_launch_description():
                     ),
                     (
                         "mission_lane_converter/output/global_path",
-                        "mission_lane_converter/output/global_path",
+                        "/planning/scenario_planning/lane_driving/behavior_planning/path",
                     ),
                 ],
                 parameters=[

@@ -206,7 +206,7 @@ private:
 
   // ROS parameters
   float target_speed_;
-  std::string local_map_frame_;
+  std::string local_map_frame_ = "map";
 
   // Unique ID for each marker
   ID marker_id_;
