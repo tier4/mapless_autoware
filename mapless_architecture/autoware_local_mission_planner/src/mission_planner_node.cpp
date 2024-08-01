@@ -299,7 +299,8 @@ void MissionPlannerNode::CallbackOdometryMessages(const nav_msgs::msg::Odometry 
     // Create marker for the goal point and publish it
     visualization_msgs::msg::Marker goal_marker;  // Create a new marker
 
-    goal_marker.header.frame_id = msg.header.frame_id;
+    goal_marker.header.frame_id =
+      "base_link";  // The goal marker is always valid for the base_link frame
     goal_marker.header.stamp = msg.header.stamp;
     goal_marker.ns = "goal_point";
     goal_marker.type = visualization_msgs::msg::Marker::POINTS;
