@@ -47,7 +47,7 @@ if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
 
   ament_auto_add_gtest(${PROJECT_NAME}_tests test/gtest_main.cpp
-    test/src/test_mission_planner_core.cpp
+    test/src/test_mission_planner.cpp
     src/mission_planner_node.cpp)
 
   ament_lint_auto_find_test_dependencies()

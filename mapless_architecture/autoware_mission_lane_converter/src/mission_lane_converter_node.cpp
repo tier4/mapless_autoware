@@ -20,7 +20,8 @@ namespace autoware::mapless_architecture
 {
 using std::placeholders::_1;
 
-MissionLaneConverterNode::MissionLaneConverterNode(const rclcpp::NodeOptions & options)
+MissionLaneConverterNode::MissionLaneConverterNode(
+  const rclcpp::NodeOptions & options, const bool init_publishers_and_subscribers)
 : Node("mission_lane_converter_node", options)
 {
   // Set quality of service to best effort (if transmission fails, do not try to resend but rather
@@ -31,49 +32,51 @@ MissionLaneConverterNode::MissionLaneConverterNode(const rclcpp::NodeOptions & o
   auto qos_reliability = rclcpp::QoS(1);
   qos_reliability.reliability();
 
-  // Initialize subscriber
-  odom_subscriber_ = this->create_subscription<nav_msgs::msg::Odometry>(
-    "mission_lane_converter/input/odometry", qos_best_effort,
-    std::bind(&MissionLaneConverterNode::CallbackOdometryMessages_, this, _1));
+  if (init_publishers_and_subscribers) {
+    // Initialize subscriber
+    odom_subscriber_ = this->create_subscription<nav_msgs::msg::Odometry>(
+      "mission_lane_converter/input/odometry", qos_best_effort,
+      std::bind(&MissionLaneConverterNode::CallbackOdometryMessages_, this, _1));
 
-  mission_lane_subscriber_ =
-    this->create_subscription<autoware_mapless_planning_msgs::msg::MissionLanesStamped>(
-      "mission_lane_converter/input/mission_lanes", qos_best_effort,
-      std::bind(&MissionLaneConverterNode::MissionLanesCallback_, this, _1));
+    mission_lane_subscriber_ =
+      this->create_subscription<autoware_mapless_planning_msgs::msg::MissionLanesStamped>(
+        "mission_lane_converter/input/mission_lanes", qos_best_effort,
+        std::bind(&MissionLaneConverterNode::MissionLanesCallback_, this, _1));
 
-  // Initialize publisher
-  trajectory_publisher_ = this->create_publisher<autoware_planning_msgs::msg::Trajectory>(
-    "mission_lane_converter/output/trajectory", qos_reliability);
+    // Initialize publisher
+    trajectory_publisher_ = this->create_publisher<autoware_planning_msgs::msg::Trajectory>(
+      "mission_lane_converter/output/trajectory", qos_reliability);
 
-  trajectory_publisher_global_ = this->create_publisher<autoware_planning_msgs::msg::Trajectory>(
-    "mission_lane_converter/output/global_trajectory", qos_reliability);
+    trajectory_publisher_global_ = this->create_publisher<autoware_planning_msgs::msg::Trajectory>(
+      "mission_lane_converter/output/global_trajectory", qos_reliability);
 
-  // Artificial publisher to test the trajectory generation, TODO(simon.eisenmann@driveblocks.ai):
-  // Remove this publisher later, it is needed to get the vehicle started
-  publisher_ = this->create_publisher<autoware_planning_msgs::msg::Trajectory>(
-    "mission_lane_converter/output/global_trajectory", qos_reliability);
+    // Artificial publisher to test the trajectory generation, TODO(simon.eisenmann@driveblocks.ai):
+    // Remove this publisher later, it is needed to get the vehicle started
+    publisher_ = this->create_publisher<autoware_planning_msgs::msg::Trajectory>(
+      "mission_lane_converter/output/global_trajectory", qos_reliability);
 
-  path_publisher_ = create_publisher<autoware_planning_msgs::msg::Path>(
-    "mission_lane_converter/output/path", qos_reliability);
+    path_publisher_ = create_publisher<autoware_planning_msgs::msg::Path>(
+      "mission_lane_converter/output/path", qos_reliability);
 
-  path_publisher_global_ = create_publisher<autoware_planning_msgs::msg::Path>(
-    "mission_lane_converter/output/global_path", qos_reliability);
+    path_publisher_global_ = create_publisher<autoware_planning_msgs::msg::Path>(
+      "mission_lane_converter/output/global_path", qos_reliability);
+
+    vis_trajectory_publisher_ = this->create_publisher<visualization_msgs::msg::Marker>(
+      "mission_lane_converter/output/vis_trajectory", qos_best_effort);
+
+    vis_trajectory_publisher_global_ = this->create_publisher<visualization_msgs::msg::Marker>(
+      "mission_lane_converter/output/vis_global_trajectory", qos_best_effort);
+
+    vis_path_publisher_ = this->create_publisher<visualization_msgs::msg::MarkerArray>(
+      "mission_lane_converter/output/vis_path", qos_best_effort);
+
+    vis_odometry_publisher_global_ = this->create_publisher<visualization_msgs::msg::Marker>(
+      "mission_lane_converter/output/vis_global_odometry", qos_best_effort);
+  }
 
   timer_ = this->create_wall_timer(
     std::chrono::milliseconds(100),
     std::bind(&MissionLaneConverterNode::TimedStartupTrajectoryCallback, this));
-
-  vis_trajectory_publisher_ = this->create_publisher<visualization_msgs::msg::Marker>(
-    "mission_lane_converter/output/vis_trajectory", qos_best_effort);
-
-  vis_trajectory_publisher_global_ = this->create_publisher<visualization_msgs::msg::Marker>(
-    "mission_lane_converter/output/vis_global_trajectory", qos_best_effort);
-
-  vis_path_publisher_ = this->create_publisher<visualization_msgs::msg::MarkerArray>(
-    "mission_lane_converter/output/vis_path", qos_best_effort);
-
-  vis_odometry_publisher_global_ = this->create_publisher<visualization_msgs::msg::Marker>(
-    "mission_lane_converter/output/vis_global_odometry", qos_best_effort);
 
   // ROS parameters (will be overwritten by external param file if exists)
   target_speed_ = declare_parameter<float>("target_speed", 3.0);
