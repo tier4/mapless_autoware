@@ -4,6 +4,14 @@ The Mission Planner module generates a reference trajectory/path in a local road
 
 The Mission Planner requires a local road model (RoadSegments). For example, this environment model can be provided by the driveblocks GmbH (<https://www.driveblocks.ai/>).
 
+The RoadSegments message contains multiple segments, each characterized by the following components:
+
+- Linestrings: Two distinct linestrings that define the geometry of the segment.
+- Neighbor IDs: Identifiers for neighboring segments.
+- Successor IDs: Identifiers for successor segments.
+
+Additionally, the RoadSegments message includes a pose attribute, which provides the position and orientation of the ego vehicle. This structure allows for a comprehensive representation of road segments and their spatial relationships.
+
 A detailed overview can be seen here:
 
 ![mapless_architecture](images/mapless_architecture.svg)

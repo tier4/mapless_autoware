@@ -1,1 +1,1 @@
-geometry_msgs/Pose[] poses # Store the points here
+geometry_msgs/Pose[] poses # The points defining the linestring.
