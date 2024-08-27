@@ -19,17 +19,17 @@
 namespace autoware::mapless_architecture
 {
 
-TEST(MissionPlannerCore, CalculateDistanceBetweenPointAndLineString)
+TEST(MissionPlanner, CalculateDistanceBetweenPointAndLineString)
 {
   EXPECT_EQ(TestCalculateDistanceBetweenPointAndLineString(), 0);
 }
 
-TEST(MissionPlannerCore, GetPointOnLane)
+TEST(MissionPlanner, GetPointOnLane)
 {
   EXPECT_EQ(TestGetPointOnLane(), 0);
 }
 
-TEST(MissionPlannerCore, RecenterGoalPoint)
+TEST(MissionPlanner, RecenterGoalPoint)
 {
   EXPECT_EQ(TestRecenterGoalpoint(), 0);
 }

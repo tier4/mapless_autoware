@@ -21,7 +21,8 @@ namespace autoware::mapless_architecture
 {
 using std::placeholders::_1;
 
-MissionPlannerNode::MissionPlannerNode(const rclcpp::NodeOptions & options)
+MissionPlannerNode::MissionPlannerNode(
+  const rclcpp::NodeOptions & options, const bool init_publishers_and_subscribers)
 : Node("mission_planner_node", options)
 {
   // Set quality of service to best effort (if transmission fails, do not try to resend but rather
@@ -29,34 +30,36 @@ MissionPlannerNode::MissionPlannerNode(const rclcpp::NodeOptions & options)
   auto qos = rclcpp::QoS(1);
   qos.best_effort();
 
-  // Initialize publisher to visualize the centerline of a lane
-  visualization_publisher_centerline_ =
-    this->create_publisher<visualization_msgs::msg::MarkerArray>(
-      "mission_planner_node/output/centerline", 1);
+  if (init_publishers_and_subscribers) {
+    // Initialize publisher to visualize the centerline of a lane
+    visualization_publisher_centerline_ =
+      this->create_publisher<visualization_msgs::msg::MarkerArray>(
+        "mission_planner_node/output/centerline", 1);
 
-  // Initialize publisher for goal point marker
-  visualizationGoalPointPublisher_ = this->create_publisher<visualization_msgs::msg::Marker>(
-    "mission_planner_node/output/marker_goal_point", 1);
+    // Initialize publisher for goal point marker
+    visualizationGoalPointPublisher_ = this->create_publisher<visualization_msgs::msg::Marker>(
+      "mission_planner_node/output/marker_goal_point", 1);
 
-  // Initialize publisher for mission lanes
-  missionLanesStampedPublisher_ =
-    this->create_publisher<autoware_mapless_planning_msgs::msg::MissionLanesStamped>(
-      "mission_planner_node/output/mission_lanes_stamped", 1);
+    // Initialize publisher for mission lanes
+    missionLanesStampedPublisher_ =
+      this->create_publisher<autoware_mapless_planning_msgs::msg::MissionLanesStamped>(
+        "mission_planner_node/output/mission_lanes_stamped", 1);
 
-  // Initialize subscriber to local map messages
-  mapSubscriber_ = this->create_subscription<autoware_mapless_planning_msgs::msg::LocalMap>(
-    "mission_planner_node/input/local_map", qos,
-    std::bind(&MissionPlannerNode::CallbackLocalMapMessages, this, _1));
+    // Initialize subscriber to local map messages
+    mapSubscriber_ = this->create_subscription<autoware_mapless_planning_msgs::msg::LocalMap>(
+      "mission_planner_node/input/local_map", qos,
+      std::bind(&MissionPlannerNode::CallbackLocalMapMessages, this, _1));
 
-  // Initialize subscriber to mission messages
-  missionSubscriber_ = this->create_subscription<autoware_mapless_planning_msgs::msg::Mission>(
-    "mission_planner/input/mission", qos,
-    std::bind(&MissionPlannerNode::CallbackMissionMessages, this, _1));
+    // Initialize subscriber to mission messages
+    missionSubscriber_ = this->create_subscription<autoware_mapless_planning_msgs::msg::Mission>(
+      "mission_planner/input/mission", qos,
+      std::bind(&MissionPlannerNode::CallbackMissionMessages, this, _1));
 
-  // Initialize subscriber to odometry messages
-  OdometrySubscriber_ = this->create_subscription<nav_msgs::msg::Odometry>(
-    "mission_planner/input/state_estimate", qos,
-    std::bind(&MissionPlannerNode::CallbackOdometryMessages, this, _1));
+    // Initialize subscriber to odometry messages
+    OdometrySubscriber_ = this->create_subscription<nav_msgs::msg::Odometry>(
+      "mission_planner/input/state_estimate", qos,
+      std::bind(&MissionPlannerNode::CallbackOdometryMessages, this, _1));
+  }
 
   // Initialize tf2 buffer and listener
   tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
