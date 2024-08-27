@@ -268,10 +268,10 @@ autoware_mapless_planning_msgs::msg::RoadSegments GetTestRoadModelForRecenterTes
   message.segments[1].linestrings[1].poses[1].position.y = 2.0;
   message.segments[1].linestrings[1].poses[1].position.z = 0.0;
 
-  int32_t neigh_1 = 1;
-  std::vector<int32_t> neighboring_ids = {neigh_1};
+  int16_t neigh_1 = 1;
+  std::vector<int16_t> neighboring_ids = {neigh_1};
   message.segments[0].neighboring_segment_id = neighboring_ids;
-  std::vector<int32_t> neighboring_ids_2 = {};
+  std::vector<int16_t> neighboring_ids_2 = {};
   message.segments[1].neighboring_segment_id = neighboring_ids_2;
 
   return message;
