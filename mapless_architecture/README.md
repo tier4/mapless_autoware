@@ -10,7 +10,7 @@ The RoadSegments message contains multiple segments, each characterized by the f
 - Neighbor IDs: Identifiers for neighboring segments.
 - Successor IDs: Identifiers for successor segments.
 
-Additionally, the RoadSegments message includes a pose attribute, which provides the position and orientation of the ego vehicle. This structure allows for a comprehensive representation of road segments and their spatial relationships.
+Additionally, the RoadSegments message includes a pose attribute, which provides the position and orientation of the ego vehicle relative to the road segments. This structure allows for a comprehensive representation of road segments and their spatial relationships.
 
 A detailed overview can be seen here:
 
