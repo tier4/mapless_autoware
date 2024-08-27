@@ -21,10 +21,24 @@
 namespace autoware::mapless_architecture
 {
 
+// Mock class for MissionLaneConverterNode
+class MissionLaneConverterNodeMock : public MissionLaneConverterNode
+{
+public:
+  explicit MissionLaneConverterNodeMock(const rclcpp::NodeOptions & options)
+  : MissionLaneConverterNode(options, false)
+  {
+    // Mock constructor intentionally does nothing.
+  }
+};
+
 int TestMissionToTrajectory()
 {
+  // Initialize ROS 2
+  rclcpp::init(0, nullptr);
+
   rclcpp::NodeOptions options;
-  MissionLaneConverterNode mission_converter = MissionLaneConverterNode(options);
+  MissionLaneConverterNodeMock mission_converter(options);
 
   autoware_mapless_planning_msgs::msg::MissionLanesStamped mission_msg;
 
@@ -123,6 +137,9 @@ int TestMissionToTrajectory()
   EXPECT_EQ(
     trj_msg.points.back().pose.position.y,
     mission_msg.drivable_lanes_right.back().centerline.back().y);
+
+  // Shutdown ROS 2
+  rclcpp::shutdown();
 
   return 0;
 }

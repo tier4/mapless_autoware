@@ -61,14 +61,20 @@ struct Lanes
  */
 class MissionPlannerNode : public rclcpp::Node
 {
+  friend class MissionPlannerNodeMock;
+
 public:
   /**
    * @brief Constructor for the MissionPlannerNode class.
    *
    * Initializes the publisher and subscriber with appropriate topics and QoS
    * settings.
+   *
+   * @param options The node options.
+   * @param init_publishers_and_subscribers If true, the publishers and subscribers are initialized.
    */
-  explicit MissionPlannerNode(const rclcpp::NodeOptions & options);
+  MissionPlannerNode(
+    const rclcpp::NodeOptions & options, const bool init_publishers_and_subscribers = true);
 
   /**
     * @brief Function which checks if the vehicle is on the goal lane.

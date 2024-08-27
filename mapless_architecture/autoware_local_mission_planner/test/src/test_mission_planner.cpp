@@ -24,6 +24,20 @@ namespace autoware::mapless_architecture
 {
 // Note: Lanelets and Segments are basically the same!
 
+// Mock class for MissionPlannerNode
+class MissionPlannerNodeMock : public MissionPlannerNode
+{
+public:
+  explicit MissionPlannerNodeMock(const rclcpp::NodeOptions & options)
+  : MissionPlannerNode(options, false)
+  {
+    // Mock constructor intentionally does nothing.
+  }
+
+  // Setter for mission
+  void SetMission(const Direction & mission) { mission_ = mission; }
+};
+
 autoware_mapless_planning_msgs::msg::RoadSegments CreateSegments()
 {
   // Local variables
@@ -31,8 +45,15 @@ autoware_mapless_planning_msgs::msg::RoadSegments CreateSegments()
 
   // Fill lanelet2 message
   autoware_mapless_planning_msgs::msg::RoadSegments message;
-  std::vector<autoware_mapless_planning_msgs::msg::Segment> lanelet_vec(n_segments);
-  message.segments = lanelet_vec;
+  message.segments.resize(n_segments);  // Initialize segments vector with n_segments
+
+  // Initialize each segment's linestrings and poses
+  for (int i = 0; i < n_segments; ++i) {
+    // Initialize each linestring and poses within each segment
+    for (int j = 0; j < 2; ++j) {                          // Assuming 2 linestrings per segment
+      message.segments[i].linestrings[j].poses.resize(2);  // Assuming 2 poses per linestring
+    }
+  }
 
   // Global position
   geometry_msgs::msg::PoseStamped msg_global_pose;
@@ -110,6 +131,9 @@ autoware_mapless_planning_msgs::msg::RoadSegments CreateSegments()
 
 int TestCalculateDistanceBetweenPointAndLineString()
 {
+  // Initialize ROS 2
+  rclcpp::init(0, nullptr);
+
   // Create an example Linestring
   lanelet::LineString2d linestring;
 
@@ -126,37 +150,43 @@ int TestCalculateDistanceBetweenPointAndLineString()
   // Create an example point
   lanelet::BasicPoint2d point(1.0, 1.0);
 
-  // Initialize MissionPlannerNode
+  // Initialize MissionPlannerNodeMock
   rclcpp::NodeOptions options;
-  MissionPlannerNode MissionPlanner = MissionPlannerNode(options);
+  MissionPlannerNodeMock mission_planner(options);
 
   // Run function
-  double distance = MissionPlanner.CalculateDistanceBetweenPointAndLineString(linestring, point);
+  double distance = mission_planner.CalculateDistanceBetweenPointAndLineString(linestring, point);
 
   // Check if distance is near to 1.0 (with allowed error of 0.001)
   EXPECT_NEAR(distance, 1.0, 0.001);
+
+  // Shutdown ROS 2
+  rclcpp::shutdown();
 
   return 0;
 }
 
 int TestGetPointOnLane()
 {
+  // Initialize ROS 2
+  rclcpp::init(0, nullptr);
+
   // Create some example segments
   autoware_mapless_planning_msgs::msg::RoadSegments road_segments = CreateSegments();
 
-  // Initialize MissionPlannerNode
+  // Initialize MissionPlannerNodeMock
   rclcpp::NodeOptions options;
-  MissionPlannerNode MissionPlanner = MissionPlannerNode(options);
+  MissionPlannerNodeMock mission_planner(options);
 
   // Convert road model
   std::vector<LaneletConnection> lanelet_connections;
   std::vector<lanelet::Lanelet> lanelets;
 
-  MissionPlanner.ConvertInput2LaneletFormat(road_segments, lanelets, lanelet_connections);
+  mission_planner.ConvertInput2LaneletFormat(road_segments, lanelets, lanelet_connections);
 
   // Get a point from the tested function which has the x value 3.0 and lies on
   // the centerline of the lanelets
-  lanelet::BasicPoint2d point = MissionPlanner.GetPointOnLane({0, 1}, 3.0, lanelets);
+  lanelet::BasicPoint2d point = mission_planner.GetPointOnLane({0, 1}, 3.0, lanelets);
 
   // Check if x value of the point is near to 3.0 (with an allowed error of
   // 0.001)
@@ -164,48 +194,57 @@ int TestGetPointOnLane()
 
   // Get a point from the tested function which has the x value 100.0 and lies
   // on the centerline of the lanelets
-  point = MissionPlanner.GetPointOnLane({0, 1}, 100.0,
-                                        lanelets);  // Far away (100m)
+  point = mission_planner.GetPointOnLane({0, 1}, 100.0,
+                                         lanelets);  // Far away (100m)
 
   // Check if x value of the point is near to 10.0 (with an allowed error of
   // 0.001)
   EXPECT_NEAR(point.x(), 10.0, 0.001);
+
+  // Shutdown ROS 2
+  rclcpp::shutdown();
 
   return 0;
 }
 
 int TestIsOnGoalLane()
 {
+  // Initialize ROS 2
+  rclcpp::init(0, nullptr);
+
   // Create some example segments
   autoware_mapless_planning_msgs::msg::RoadSegments road_segments = CreateSegments();
 
-  // Initialize MissionPlannerNode
+  // Initialize MissionPlannerNodeMock
   rclcpp::NodeOptions options;
-  MissionPlannerNode MissionPlanner = MissionPlannerNode(options);
+  MissionPlannerNodeMock mission_planner(options);
 
   // Convert road model
   std::vector<LaneletConnection> lanelet_connections;
   std::vector<lanelet::Lanelet> lanelets;
 
-  MissionPlanner.ConvertInput2LaneletFormat(road_segments, lanelets, lanelet_connections);
+  mission_planner.ConvertInput2LaneletFormat(road_segments, lanelets, lanelet_connections);
 
   // Define a point with x = 1.0 and y = 0.0
   lanelet::BasicPoint2d point(1.0, 0.0);
 
   // Check if the point is on the lane: should be true
-  EXPECT_EQ(MissionPlanner.IsOnGoalLane(0, point, lanelets, lanelet_connections), true);
+  EXPECT_EQ(mission_planner.IsOnGoalLane(0, point, lanelets, lanelet_connections), true);
 
   // Define a point with x = 100.0 and y = 100.0
   lanelet::BasicPoint2d point2(100.0, 100.0);
 
   // Check if the point is on the lane: should be false
-  EXPECT_EQ(MissionPlanner.IsOnGoalLane(0, point2, lanelets, lanelet_connections), false);
+  EXPECT_EQ(mission_planner.IsOnGoalLane(0, point2, lanelets, lanelet_connections), false);
 
   // Define a point with x = 15.0 and y = 0.0
   lanelet::BasicPoint2d point3(15.0, 0.0);
 
   // Check if the point is on the lane: should be true
-  EXPECT_EQ(MissionPlanner.IsOnGoalLane(0, point3, lanelets, lanelet_connections), true);
+  EXPECT_EQ(mission_planner.IsOnGoalLane(0, point3, lanelets, lanelet_connections), true);
+
+  // Shutdown ROS 2
+  rclcpp::shutdown();
 
   return 0;
 }
@@ -217,8 +256,15 @@ autoware_mapless_planning_msgs::msg::RoadSegments GetTestRoadModelForRecenterTes
 
   // Fill lanelet2 message
   autoware_mapless_planning_msgs::msg::RoadSegments message;
-  std::vector<autoware_mapless_planning_msgs::msg::Segment> lanelet_vec(n_segments);
-  message.segments = lanelet_vec;
+  message.segments.resize(n_segments);  // Initialize segments vector with n_segments
+
+  // Initialize each segment's linestrings and poses
+  for (int i = 0; i < n_segments; ++i) {
+    // Initialize each linestring and poses within each segment
+    for (int j = 0; j < 2; ++j) {                          // Assuming 2 linestrings per segment
+      message.segments[i].linestrings[j].poses.resize(2);  // Assuming 2 poses per linestring
+    }
+  }
 
   // Global position
   geometry_msgs::msg::PoseStamped msg_global_pose;
@@ -279,9 +325,12 @@ autoware_mapless_planning_msgs::msg::RoadSegments GetTestRoadModelForRecenterTes
 
 int TestRecenterGoalpoint()
 {
-  // Create a mission planner
+  // Initialize ROS 2
+  rclcpp::init(0, nullptr);
+
+  // Initialize MissionPlannerNodeMock
   rclcpp::NodeOptions options;
-  MissionPlannerNode mission_planner = MissionPlannerNode(options);
+  MissionPlannerNodeMock mission_planner(options);
 
   // Get a local road model for testing
   autoware_mapless_planning_msgs::msg::RoadSegments road_segments =
@@ -344,64 +393,67 @@ int TestRecenterGoalpoint()
   EXPECT_EQ(goal_point_recentered.x(), goal_point.x());
   EXPECT_EQ(goal_point_recentered.y(), goal_point.y());
 
+  // Shutdown ROS 2
+  rclcpp::shutdown();
+
   return 0;
 }
 
 int TestCheckIfGoalPointShouldBeReset()
 {
+  // Initialize ROS 2
+  rclcpp::init(0, nullptr);
+
   // Create some example segments
   autoware_mapless_planning_msgs::msg::RoadSegments road_segments = CreateSegments();
 
   autoware_mapless_planning_msgs::msg::LocalMap local_map;
   local_map.road_segments = road_segments;
 
-  // Initialize MissionPlannerNode
+  // Initialize MissionPlannerNodeMock
   rclcpp::NodeOptions options;
-  MissionPlannerNode MissionPlanner = MissionPlannerNode(options);
+  MissionPlannerNodeMock mission_planner(options);
 
   // Convert road model
   std::vector<LaneletConnection> lanelet_connections;
   std::vector<lanelet::Lanelet> lanelets;
 
-  MissionPlanner.ConvertInput2LaneletFormat(road_segments, lanelets, lanelet_connections);
-
-  // Compute available lanes
-  MissionPlanner.CallbackLocalMapMessages(local_map);
+  mission_planner.ConvertInput2LaneletFormat(road_segments, lanelets, lanelet_connections);
 
   // TEST 1: check if goal point is reset in non-default mission
   // Define a goal point with negative x value
   lanelet::BasicPoint2d point(-1.0, 0.0);
-  MissionPlanner.goal_point(point);
+  mission_planner.goal_point(point);
 
   // Set a non-default mission to make the goal point reset work
-  autoware_mapless_planning_msgs::msg::Mission mission_msg;
-  mission_msg.mission_type = autoware_mapless_planning_msgs::msg::Mission::LANE_CHANGE_LEFT;
-  MissionPlanner.CallbackMissionMessages(mission_msg);
+  mission_planner.SetMission(left);
 
   // Call function which is tested
-  MissionPlanner.CheckIfGoalPointShouldBeReset(lanelets, lanelet_connections);
+  mission_planner.CheckIfGoalPointShouldBeReset(lanelets, lanelet_connections);
 
   // Check if the goal point is reset
   EXPECT_EQ(
-    MissionPlanner.goal_point().x(),
-    10);  // Projection is to x = 10, since this is the highest x value
+    mission_planner.goal_point().x(),
+    20);  // Projection is to x = 10, since this is the highest x value
           // on the right neighbor lane!
 
   // TEST 2: check if goal point reset is skipped in default mission
-  MissionPlanner.goal_point(point);
+  mission_planner.goal_point(point);
 
-  // Set a non-default mission to make the goal point reset work
-  mission_msg.mission_type = autoware_mapless_planning_msgs::msg::Mission::LANE_KEEP;
-  MissionPlanner.CallbackMissionMessages(mission_msg);
+  // Set a default mission to make the goal point reset work
+  mission_planner.SetMission(stay);
 
   // Call function which is tested
-  MissionPlanner.CheckIfGoalPointShouldBeReset(lanelets, lanelet_connections);
+  mission_planner.CheckIfGoalPointShouldBeReset(lanelets, lanelet_connections);
 
   // Check if the goal point is reset
   EXPECT_EQ(
-    MissionPlanner.goal_point().x(),
+    mission_planner.goal_point().x(),
     point.x());  // goal point should equal the input point since goal point
                  // is not reset in the default mission (ego lane following)
+
+  // Shutdown ROS 2
+  rclcpp::shutdown();
 
   return 0;
 }
@@ -413,8 +465,15 @@ std::tuple<std::vector<lanelet::Lanelet>, std::vector<LaneletConnection>> Create
 
   // Fill lanelet2 message
   autoware_mapless_planning_msgs::msg::RoadSegments message;
-  std::vector<autoware_mapless_planning_msgs::msg::Segment> lanelet_vec(n_segments);
-  message.segments = lanelet_vec;
+  message.segments.resize(n_segments);  // Initialize segments vector with n_segments
+
+  // Initialize each segment's linestrings and poses
+  for (int i = 0; i < n_segments; ++i) {
+    // Initialize each linestring and poses within each segment
+    for (int j = 0; j < 2; ++j) {                          // Assuming 2 linestrings per segment
+      message.segments[i].linestrings[j].poses.resize(2);  // Assuming 2 poses per linestring
+    }
+  }
 
   // Global position
   geometry_msgs::msg::PoseStamped msg_global_pose;
@@ -470,32 +529,35 @@ std::tuple<std::vector<lanelet::Lanelet>, std::vector<LaneletConnection>> Create
   message.segments[1].successor_segment_id = {-1};
   message.segments[1].neighboring_segment_id = {-1, -1};
 
-  // Initialize MissionPlannerNode
+  // Initialize MissionPlannerNodeMock
   rclcpp::NodeOptions options;
-  MissionPlannerNode MissionPlanner = MissionPlannerNode(options);
+  MissionPlannerNodeMock mission_planner(options);
 
   // Output
   std::vector<LaneletConnection> lanelet_connections;
   std::vector<lanelet::Lanelet> converted_lanelets;
 
-  MissionPlanner.ConvertInput2LaneletFormat(message, converted_lanelets, lanelet_connections);
+  mission_planner.ConvertInput2LaneletFormat(message, converted_lanelets, lanelet_connections);
   return std::make_tuple(converted_lanelets, lanelet_connections);
 }
 
 int TestCalculateLanes()
 {
+  // Initialize ROS 2
+  rclcpp::init(0, nullptr);
+
   // Create some example lanelets: Two lanelets 0 and 1, 1 is the successor of
   // 0, the ego lanelet is 0
   auto tuple = CreateLane();
   std::vector<lanelet::Lanelet> lanelets = std::get<0>(tuple);
   std::vector<LaneletConnection> lanelet_connections = std::get<1>(tuple);
 
-  // Initialize MissionPlannerNode
+  // Initialize MissionPlannerNodeMock
   rclcpp::NodeOptions options;
-  MissionPlannerNode MissionPlanner = MissionPlannerNode(options);
+  MissionPlannerNodeMock mission_planner(options);
 
   // Call function which is tested
-  Lanes result = MissionPlanner.CalculateLanes(lanelets, lanelet_connections);
+  Lanes result = mission_planner.CalculateLanes(lanelets, lanelet_connections);
 
   // Get lanes
   std::vector<int> ego_lane_idx = result.ego;
@@ -517,19 +579,25 @@ int TestCalculateLanes()
     ego_lane_idx[1],
     1);  // Expect ego lane = {0, 1} (1 is index of successor of ego lanelet)
 
+  // Shutdown ROS 2
+  rclcpp::shutdown();
+
   return 0;
 }
 
 int TestCreateMarkerArray()
 {
+  // Initialize ROS 2
+  rclcpp::init(0, nullptr);
+
   // Create some example lanelets
   auto tuple = CreateLane();
   std::vector<lanelet::Lanelet> lanelets = std::get<0>(tuple);
   std::vector<LaneletConnection> lanelet_connections = std::get<1>(tuple);
 
-  // Initialize MissionPlannerNode
+  // Initialize MissionPlannerNodeMock
   rclcpp::NodeOptions options;
-  MissionPlannerNode MissionPlanner = MissionPlannerNode(options);
+  MissionPlannerNodeMock mission_planner(options);
 
   // Create empty message
   autoware_mapless_planning_msgs::msg::RoadSegments message;
@@ -564,19 +632,25 @@ int TestCreateMarkerArray()
   EXPECT_EQ(marker_array.markers[0].points[0].y,
             0.0);  // Expect 0.0 for y
 
+  // Shutdown ROS 2
+  rclcpp::shutdown();
+
   return 0;
 }
 
 int TestCreateDrivingCorridor()
 {
+  // Initialize ROS 2
+  rclcpp::init(0, nullptr);
+
   // Create some example lanelets
   auto tuple = CreateLane();
   std::vector<lanelet::Lanelet> lanelets = std::get<0>(tuple);
   std::vector<LaneletConnection> lanelet_connections = std::get<1>(tuple);
 
-  // Initialize MissionPlannerNode
+  // Initialize MissionPlannerNodeMock
   rclcpp::NodeOptions options;
-  MissionPlannerNode MissionPlanner = MissionPlannerNode(options);
+  MissionPlannerNodeMock mission_planner(options);
 
   // Call function which is tested
   autoware_mapless_planning_msgs::msg::DrivingCorridor driving_corridor =
@@ -599,6 +673,9 @@ int TestCreateDrivingCorridor()
 
   // Check if y value of first point in right bound is 0.5
   EXPECT_EQ(driving_corridor.bound_right[0].y, 0.5);
+
+  // Shutdown ROS 2
+  rclcpp::shutdown();
 
   return 0;
 }

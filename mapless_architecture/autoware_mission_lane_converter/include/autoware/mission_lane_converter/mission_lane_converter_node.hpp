@@ -43,8 +43,12 @@ public:
    *
    * Initializes the publisher and subscriber with appropriate topics and QoS
    * settings.
+   *
+   * @param options The node options.
+   * @param init_publishers_and_subscribers Flag to initialize publishers and subscribers.
    */
-  explicit MissionLaneConverterNode(const rclcpp::NodeOptions & options);
+  MissionLaneConverterNode(
+    const rclcpp::NodeOptions & options, const bool init_publishers_and_subscribers = true);
 
   /**
    * @brief Converts the mission message into a reference trajectory which is
