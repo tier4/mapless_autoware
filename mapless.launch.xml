@@ -79,16 +79,16 @@
     <arg name="container_name" value="$(var pointcloud_container_name)"/>
   </include> -->
 
-  <executable cmd="ros2 topic pub /localization/acceleration geometry_msgs/msg/AccelWithCovarianceStamped" />
-  <executable cmd="ros2 topic pub /api/autoware/get/engage autoware_vehicle_msgs/msg/Engage '{engage: True}'" />
+  <executable cmd="ros2 topic pub /localization/acceleration geometry_msgs/msg/AccelWithCovarianceStamped"/>
+  <executable cmd="ros2 topic pub /api/autoware/get/engage autoware_vehicle_msgs/msg/Engage '{engage: True}'"/>
 
   <!-- <node pkg="topic_tools" exec="relay" name="relay_trajectory">
     <param name="input_topic" value="/planning/scenario_planning/local_trajectory" />
-    <param name="output_topic" value="/planning/scenario_planning/trajectory" /> 
+    <param name="output_topic" value="/planning/scenario_planning/trajectory" />
   </node> -->
   <node pkg="topic_tools" exec="relay" name="relay_path">
-    <param name="input_topic" value="/mapless_architecture/mission_lane_converter/output/global_path" />
-    <param name="output_topic" value="/planning/scenario_planning/lane_driving/behavior_planning/path" /> 
+    <param name="input_topic" value="/mapless_architecture/mission_lane_converter/output/global_path"/>
+    <param name="output_topic" value="/planning/scenario_planning/lane_driving/behavior_planning/path"/>
   </node>
 
   <!-- Vehicle -->
