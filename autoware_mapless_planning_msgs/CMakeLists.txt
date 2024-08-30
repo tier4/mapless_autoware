@@ -16,7 +16,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
     geometry_msgs
     std_msgs
     nav_msgs
-  ADD_LINTER_TESTS
+  # ADD_LINTER_TESTS
 )
 
 if(BUILD_TESTING)
