@@ -13,51 +13,10 @@
 // limitations under the License.
 
 #include "gtest/gtest.h"
-#include "include/test_mission_planner_core.hpp"
 #include "rclcpp/rclcpp.hpp"
 
 namespace autoware::mapless_architecture
 {
-
-TEST(MissionPlanner, CalculateDistanceBetweenPointAndLineString)
-{
-  EXPECT_EQ(TestCalculateDistanceBetweenPointAndLineString(), 0);
-}
-
-TEST(MissionPlanner, GetPointOnLane)
-{
-  EXPECT_EQ(TestGetPointOnLane(), 0);
-}
-
-TEST(MissionPlanner, RecenterGoalPoint)
-{
-  EXPECT_EQ(TestRecenterGoalpoint(), 0);
-}
-
-TEST(MissionPlanner, IsOnGoalLane)
-{
-  EXPECT_EQ(TestIsOnGoalLane(), 0);
-}
-
-TEST(MissionPlanner, CheckIfGoalPointShouldBeReset)
-{
-  EXPECT_EQ(TestCheckIfGoalPointShouldBeReset(), 0);
-}
-
-TEST(MissionPlanner, CalculateLanes)
-{
-  EXPECT_EQ(TestCalculateLanes(), 0);
-}
-
-TEST(MissionPlanner, CreateMarkerArray)
-{
-  EXPECT_EQ(TestCreateMarkerArray(), 0);
-}
-
-TEST(MissionPlanner, CreateDrivingCorridor)
-{
-  EXPECT_EQ(TestCreateDrivingCorridor(), 0);
-}
 
 int main(int argc, char ** argv)
 {

@@ -12,19 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "gtest/gtest.h"
-#include "include/test_mission_planner_converter.hpp"
-#include "rclcpp/rclcpp.hpp"
+#ifndef TEST_MISSION_PLANNER_HPP_
+#define TEST_MISSION_PLANNER_HPP_
 
 namespace autoware::mapless_architecture
 {
 
-int main(int argc, char ** argv)
-{
-  rclcpp::init(argc, argv);
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-  rclcpp::shutdown();
-}
+// Empty for now
 
 }  // namespace autoware::mapless_architecture
+
+#endif  // TEST_MISSION_PLANNER_HPP_

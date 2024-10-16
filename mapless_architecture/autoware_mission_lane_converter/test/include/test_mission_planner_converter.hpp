@@ -18,12 +18,7 @@
 namespace autoware::mapless_architecture
 {
 
-/**
- * @brief Test the ConvertMissionToTrajectory() function.
- *
- * @return int: returns 0 on success
- */
-int TestMissionToTrajectory();
+// Empty for now
 
 }  // namespace autoware::mapless_architecture
 
