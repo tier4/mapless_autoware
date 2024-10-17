@@ -47,8 +47,8 @@ if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
   find_package(ament_lint_auto REQUIRED)
 
-  ament_auto_add_gtest(${PROJECT_NAME}_tests test/gtest_main.cpp
-    test/src/test_mission_planner_converter.cpp
+  ament_auto_add_gtest(${PROJECT_NAME}_tests
+    test/test_mission_planner_converter.cpp
     src/mission_lane_converter_node.cpp)
 
   ament_lint_auto_find_test_dependencies()
