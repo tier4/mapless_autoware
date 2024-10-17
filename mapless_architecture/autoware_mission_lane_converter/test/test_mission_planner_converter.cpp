@@ -21,7 +21,9 @@
 namespace autoware::mapless_architecture
 {
 
-// Mock class for MissionLaneConverterNode
+/**
+ * @brief Mock class for MissionLaneConverterNode
+ */
 class MissionLaneConverterNodeMock : public MissionLaneConverterNode
 {
 public:
@@ -32,7 +34,10 @@ public:
   }
 };
 
-int TestMissionToTrajectory()
+/**
+ * @brief Test the ConvertMissionToTrajectory() function.
+ */
+TEST(MissionConverter, MissionToTrajectory)
 {
   // Initialize ROS 2
   rclcpp::init(0, nullptr);
@@ -140,7 +145,5 @@ int TestMissionToTrajectory()
 
   // Shutdown ROS 2
   rclcpp::shutdown();
-
-  return 0;
 }
 }  // namespace autoware::mapless_architecture
