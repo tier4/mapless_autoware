@@ -22,6 +22,24 @@ namespace autoware::mapless_architecture
 {
 
 /**
+ * @brief The fixture for testing the mission lane converter.
+ *
+ */
+class MissionLaneConverterTest : public testing::Test
+{
+protected:
+  MissionLaneConverterTest()
+  {
+    rclcpp::init(0, nullptr);  // Initialize ROS 2
+  }
+
+  ~MissionLaneConverterTest() override
+  {
+    rclcpp::shutdown();  // Shutdown ROS 2
+  }
+};
+
+/**
  * @brief Mock class for MissionLaneConverterNode
  */
 class MissionLaneConverterNodeMock : public MissionLaneConverterNode
@@ -37,11 +55,8 @@ public:
 /**
  * @brief Test the ConvertMissionToTrajectory() function.
  */
-TEST(MissionConverter, MissionToTrajectory)
+TEST_F(MissionLaneConverterTest, TestConvertMissionToTrajectoryExampleInputAndOutput)
 {
-  // Initialize ROS 2
-  rclcpp::init(0, nullptr);
-
   rclcpp::NodeOptions options;
   MissionLaneConverterNodeMock mission_converter(options);
 
@@ -59,13 +74,10 @@ TEST(MissionConverter, MissionToTrajectory)
   mission_msg.ego_lane.centerline.back().y = 0.0;
 
   // Get converted trajectory
-  std::tuple<
-    autoware_planning_msgs::msg::Trajectory, visualization_msgs::msg::Marker,
-    autoware_planning_msgs::msg::Path, visualization_msgs::msg::MarkerArray>
-    mission_to_trj = mission_converter.ConvertMissionToTrajectory(mission_msg);
+  auto mission_to_trj = mission_converter.ConvertMissionToTrajectory(mission_msg);
 
   // Extract trajectory
-  autoware_planning_msgs::msg::Trajectory trj_msg = std::get<0>(mission_to_trj);
+  auto trj_msg = std::get<0>(mission_to_trj);
 
   EXPECT_EQ(trj_msg.points.back().pose.position.x, mission_msg.ego_lane.centerline.back().x);
   EXPECT_EQ(trj_msg.points.back().pose.position.y, mission_msg.ego_lane.centerline.back().y);
@@ -142,8 +154,5 @@ TEST(MissionConverter, MissionToTrajectory)
   EXPECT_EQ(
     trj_msg.points.back().pose.position.y,
     mission_msg.drivable_lanes_right.back().centerline.back().y);
-
-  // Shutdown ROS 2
-  rclcpp::shutdown();
 }
 }  // namespace autoware::mapless_architecture

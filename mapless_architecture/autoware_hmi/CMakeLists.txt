@@ -40,16 +40,6 @@ install(DIRECTORY
 launch
 DESTINATION share/${PROJECT_NAME})
 
-# --- SPECIFY TESTS ---
-if(BUILD_TESTING)
-  find_package(ament_cmake_gtest REQUIRED)
-  find_package(ament_lint_auto REQUIRED)
-
-  ament_auto_add_gtest(${PROJECT_NAME}_tests test/gtest_main.cpp)
-
-  ament_lint_auto_find_test_dependencies()
-endif()
-
 # Ensure all packages are correctly installed
 ament_auto_package(
   INSTALL_TO_SHARE
